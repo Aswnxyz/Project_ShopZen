@@ -1,0 +1,112 @@
+
+
+
+
+ <div class="container my-5">
+  <h2>Email OTP Verification</h2>
+  <% if (typeof message !== 'undefined') { %>
+    <p class="text-center text-muted"><%= message %></p>
+  <% } %>
+
+  <form action="/verifyOTP" id="otpForm" method="post">
+    <div class="form-group">
+      <p>Your mail sent to <%=savedUser.email%></p>
+    </div>
+    <div id="timer">1:59</div>
+    <div class="form-group mt-3">
+      <label for="otpInput">OTP</label>
+      <input type="hidden" name="user_Id" value="<%=savedUser._id%>">
+      <input type="text" class="form-control" name="otp" id="otpInput" placeholder="Enter OTP" required>
+    </div>
+    <input class="btn btn-primary btn-block" type="submit" value="Verify OTP">
+  </form>
+
+  <p id="status" class="status-message"></p>
+  
+  <form action="/resendOTP" id="resendForm" style="display: none;" method="post">
+    <input type="hidden" name="email" value="<%=savedUser.email%>">
+    <input class="btn btn-secondary btn-block mt-3" type="submit" value="Resend OTP">
+  </form>
+
+  
+
+</div>
+<!-- 
+<script>
+
+const timerElement = document.getElementById('timer');
+const resendForm = document.getElementById('resendForm');
+const endTime = new Date();
+endTime.setMinutes(endTime.getMinutes() + 1);
+endTime.setSeconds(endTime.getSeconds() + 59);
+
+function updateTimer() {
+  const currentTime = new Date();
+  const remainingTime = endTime - currentTime;
+
+  if (remainingTime <= 0) {
+    timerElement.textContent = 'Timer Expired';
+    resendForm.style.display = 'block'; // Show the resend OTP form
+  } else {
+    const minutes = Math.floor((remainingTime % (1000 * 60 * 60)) / (1000 * 60));
+    const seconds = Math.floor((remainingTime % (1000 * 60)) / 1000);
+    timerElement.textContent = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+  }
+}
+
+setInterval(updateTimer, 1000);
+
+
+otpForm.addEventListener('submit', async (event) => {
+  event.preventDefault();
+  const formData = new FormData(otpForm);
+  const otp = formData.get('otp');
+  const userId = formData.get('user_Id');
+
+  // You should implement a function to send the OTP and verify it on the server-side.
+  const response = await verifyOTP(otp, userId); // Replace 'verifyOTP' with the actual server-side verification function
+
+  if (response.success) {
+    // OTP is valid
+    statusMessage.textContent = 'OTP verified successfully!';
+  } else {
+    // OTP is invalid
+    statusMessage.textContent = 'Invalid OTP. Please try again.';
+    resendForm.style.display = 'block'; // Show the resend OTP form
+  }
+});
+</script> -->
+
+
+
+
+<script>
+  const timerElement = document.getElementById('timer');
+  const otpForm = document.getElementById('otpForm');
+  const resendForm = document.getElementById('resendForm');
+  const statusMessage = document.getElementById('status');
+  const endTime = new Date();
+  endTime.setMinutes(endTime.getMinutes() + 1);
+  endTime.setSeconds(endTime.getSeconds() + 59);
+  
+  function updateTimer() {
+    const currentTime = new Date();
+    const remainingTime = endTime - currentTime;
+  
+    if (remainingTime <= 0) {
+      timerElement.textContent = 'Timer Expired';
+      otpForm.style.display = 'none'; // Hide the OTP verification form
+      resendForm.style.display = 'block'; // Show the resend OTP form
+    } else {
+      const minutes = Math.floor((remainingTime % (1000 * 60 * 60)) / (1000 * 60));
+      const seconds = Math.floor((remainingTime % (1000 * 60)) / 1000);
+      timerElement.textContent = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+    }
+  }
+  
+  setInterval(updateTimer, 1000);
+  
+ 
+  
+  </script>
+  

@@ -1,0 +1,173 @@
+<main class="main-wrap">
+    <section class="content-main">
+        <div class="content-header">
+            <div>
+                <h2 class="content-title card-title">Order List </h2>
+                <!-- {{!-- <p>Lorem ipsum dolor sit amet.</p> --}} -->
+            </div>
+            <div class="container">
+                <div class="row">
+                    <div class="col-md-8"> <!-- Adjust the column size as per your requirement -->
+                        <form>
+                            <div class="input-group">
+                                <input type="text" placeholder="Search order ID" class="form-control bg-white" name="orderId">
+                                <div class="input-group-append">
+                                    <button type="submit" class="btn btn-md rounded font-sm">Search</button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="card mb-4">
+            <header class="card-header">
+                <div class="row gx-3">
+                    <!-- {{!-- <div class="col-lg-4 col-md-6 me-auto">
+                        <input type="text" placeholder="Search..." class="form-control">
+                    </div> --}} -->
+                    <div class="col-lg-2 col-6 col-md-3">
+                        <select class="form-select" id="statusFilter">
+                            <option>all</option>
+                            <option>Pending</option>
+                            <option>Placed</option>
+                            <option>Cancelled</option>
+                            <option>Delivered</option>
+                            <option>Return</option>
+                        </select>
+                    </div>
+                    <!-- {{!-- <div class="col-lg-2 col-6 col-md-3">
+                        <select class="form-select">
+                            <option>Show 20</option>
+                            <option>Show 30</option>
+                            <option>Show 40</option>
+                        </select>
+                    </div> --}} -->
+                </div>
+            </header> <!-- card-header end// -->
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr style="background-color: rgb(199, 210, 206);">
+                                <th>Sl No</th>
+                                <th scope="col">UserName</th>
+                                <th scope="col">OrderId</th>
+                                <th scope="col">Total</th>
+                                <th scope="col">Date</th>
+                                <th scope="col">Status</th>
+                                <th scope="col" class="text-end"> Action </th>
+                            </tr>
+                        </thead>
+                        <tbody id="ordersContainer">
+                            <% for(let i=0 ; i< allOrders.length ; i++) { %>
+                            <tr>
+                                <td>
+                                    <%=startingIndex + i %>
+                                </td>
+                                <td>
+                                    <%=allOrders[i].userId.name %>
+                                </td>
+
+                                <td><%=allOrders[i].orderId%></td>
+                                <td>₹<%=allOrders[i].totalPrice%></td> 
+                                <td><%=allOrders[i].createdAt.toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit', second: '2-digit' }) %></td>
+
+                                <% if ( allOrders[i].orderStatus === "placed") { %>
+                                <td class="order-status"><span  class="badge rounded-pill alert-success">Placed</span></td>
+                                <% } else if (allOrders[i].orderStatus === "pending"){ %>
+                                <td class="order-status"><span class="badge rounded-pill alert-warning">Pending</span></td>
+                                <% } else if (allOrders[i].orderStatus === "cancelled"){ %>
+                                <td class="order-status"><span class="badge rounded-pill alert-danger">Cancelled</span></td>
+                                <% } else if (allOrders[i].orderStatus === "recieved"){ %>
+                                <td class="order-status"><span class="badge rounded-pill alert-success">Delivered</span></td>
+                                <% } else if (allOrders[i].orderStatus === "return"){ %>
+                                <td class="order-status"><span class="badge rounded-pill alert-danger">Return</span></td>
+                                <%  }%>
+
+                                <td class="text-end">
+                                    <a href="/admin/user-orderDetails/<%=allOrders[i]._id%>?status=<%=allOrders[i].orderStatus%>"
+                                        class="btn btn-md rounded font-sm">Details</a>
+                                </td>
+                            </tr>
+                            <% } %>
+                        </tbody>
+                    </table>
+                </div> <!-- table-responsive //end -->
+            </div> <!-- card-body end// -->
+        </div> <!-- card end// -->
+        <div class="pagination d-flex justify-content-center">
+            <% if (currentPage > 1) { %>
+            <a href="/admin/orders?page=<%= currentPage - 1 %>" class="page-link"
+              ><i class="fa-solid fa-chevron-left" style="color: #000000"></i> Prev</a
+            >
+            <% } %> <% if (currentPage < totalPages) { %>
+            <a href="/admin/orders?page=<%= currentPage + 1 %>" class="page-link"
+              >Next <i class="fa-solid fa-chevron-right" style="color: #000000"></i
+            ></a>
+            <% } %>
+          </div>
+    </section> <!-- content-main end// -->
+
+    <% if (typeof successMessage !== 'undefined') { %>
+        <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
+        <script>
+          const message=  '<%= successMessage %>'
+          // Display the toast message for a successful login
+          Toastify({
+            text: '<%= successMessage %>',
+            duration: 3000,
+            backgroundColor:'#3498db', 
+            gravity: 'top', // Display the toast at the top of the screen
+            position: 'center', // Center the toast horizontally
+            stopOnFocus: true,
+          }).showToast();
+      
+      
+        </script>
+      <% } %>
+
+    <script>
+        function formatDate(dateString) {
+            const options = { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit', second: '2-digit' };
+            const date = new Date(dateString);
+            return date.toLocaleString('en-GB', options);
+        }
+    </script>
+
+    
+
+<script>
+    $(document).ready(function () {
+        // Function to filter orders based on status
+        function filterOrdersByStatus(status) {
+            const ordersContainer = $("#ordersContainer");
+            const allRows = ordersContainer.find("tr");
+
+            allRows.each(function () {
+                const row = $(this);
+                const rowStatus = row.find(".order-status").text().trim().toLowerCase();
+
+                // Show/hide rows based on the selected status
+                if (status === "all" || rowStatus === status.toLowerCase()) {
+                    row.show();
+                } else {
+                    row.hide();
+                }
+            });
+        }
+
+        // Listen for changes to the status filter dropdown
+        $("#statusFilter").on("change", function () {
+            const selectedStatus = $(this).val(); // Get the selected status
+            filterOrdersByStatus(selectedStatus); // Filter the orders based on the selected status
+        });
+
+        // Initially, show all orders when the page loads
+        filterOrdersByStatus("all");
+    });
+</script>
+
+
+
+    

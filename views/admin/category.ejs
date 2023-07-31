@@ -1,0 +1,102 @@
+
+
+
+ <div class="container">
+  <h1 class="mt-4">Category Management</h1> 
+
+  <!-- Form to add a new category -->
+  <h2 class="mt-4">Add a New Category</h2>
+  
+  <% if (typeof message !== 'undefined') { %>
+    <div class="alert alert-<%= message.startsWith('Category added') ? 'success' : 'danger' %> alert-dismissible fade show" role="alert">
+      <%= message %>
+    </div>
+  <% } %>
+  
+
+  <form action="/admin/add-category" method="post">
+    <div class="form-group">
+      <label for="categoryName">Category Name:</label>
+      <div id="messageContainer"></div>
+      <input type="text" class="form-control bg-light border-secondary" id="categoryName" name="categoryName" required>
+    </div>
+    <button type="submit" class="btn btn-primary"style="background-color:Green"  >Add Category</button>
+  </form>
+
+  <!-- Table to display existing categories -->
+  <h2 class="mt-4">Existing Categories</h2>
+
+  <div class="container my-3">
+    <div class="row">
+        <div class="col-md-8"> <!-- Adjust the column size as per your requirement -->
+            <form>
+                <div class="input-group">
+                    <input type="text" placeholder="Search Categories" class="form-control bg-white border-dark" name="orderId">
+                    <div class="input-group-append">
+                        <button type="submit" class="btn btn-md rounded font-sm ml-10" style="height: 50px;">Search</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+  <table class="table bg-light">
+    <thead>
+      <tr>
+        <th>Category Name</th>
+        <th>Subcategories</th>
+        <th>Edit</th>
+        <th>Delete</th>
+      </tr>
+    </thead>
+    <tbody>
+
+      <% for (var i = 0; i < category.length; i++) { %>
+        <tr>
+          <td style="font-weight:bold;font-size: medium;"><%= category[i].name %></td>
+          <td>
+            <ul>
+              <% for (var j = 0; j < category[i].subCategory.length; j++) { %>
+
+              <li><%= category[i].subCategory[j] %></li> 
+              
+              <% } %>
+            </ul>
+            <form class="form-inline mt-2" action="/admin/add-subcategory?categoryName=<%= category[i].name %>" method="post">
+              <div class="form-group">
+                <input type="text" class="form-control mr-2 border-secondary" id="subcategoryName" name="subcategoryName" required>
+              </div>
+              <button type="submit" style="background-color: rgb(5, 147, 5);" class="btn btn-primary">Add Subcategory</button>
+            </form>
+          </td>
+          <td><a href="/admin/editProductCategory?categoryName=<%=category[i].name%>" class="btn btn-primary" style="background-color: blue;" >Edit</a></td>
+          <td><button  class="btn btn-danger" style="background-color: red;" onclick=" deleteCategory('<%= category[i].name %>')">Delete</button></td>
+        </tr>
+      <% } %>
+
+    </tbody>
+  </table>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.0.19/dist/sweetalert2.all.min.js"></script>
+
+<script src="/assets/js/script.js"></script>
+
+
+<% if (typeof successMessage !== 'undefined') { %>
+  <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
+  <script>
+    const message=  '<%= successMessage %>'
+    // Display the toast message for a successful login
+    Toastify({
+      text: '<%= successMessage %>',
+      duration: 4000,
+      backgroundColor:message.startsWith('New Category')? '#3498db':'#00FF00', 
+      gravity: 'top', // Display the toast at the top of the screen
+      position: 'center', // Center the toast horizontally
+      stopOnFocus: true,
+    }).showToast();
+
+
+  </script>
+<% } %>

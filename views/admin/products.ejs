@@ -1,0 +1,146 @@
+<main class="main-wrap">
+    <section class="content-main">
+        <div class="content-header">
+            <div>
+                <h2 class="content-title card-title">Products List</h2>
+            </div>
+           
+
+            <div class="container">
+                <div class="row">
+                    <div class="col-md-8"> <!-- Adjust the column size as per your requirement -->
+                        <form id="searchForm" onsubmit="">
+                            <div class="input-group">
+                                <input type="text" placeholder="Search Products" class="form-control bg-white" name="search">
+                                <div class="input-group-append">
+                                    <button type="submit" class="btn btn-md rounded font-sm" style="background-color: rgb(85, 85, 245);">Search</button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+              <div class="d-flex align-items-end flex-column">
+                <!-- {{!-- <a href="#" class="btn btn-light rounded font-md">Export</a>
+                <a href="#" class="btn btn-light rounded  font-md">Import</a> --}} -->
+                <a href="/admin/add-product" class="btn btn-primary btn-sm rounded" style="background-color: green;">Add product</a>
+            </div>
+
+
+        </div>
+        <div class="card mb-4">
+            <header class="card-header">
+                <div class="row align-items-center">
+                    <div class="col col-check flex-grow-0">
+                        <!-- {{!-- <div class="form-check ms-2">
+                            <input class="form-check-input" type="checkbox" value="">
+                        </div> --}}
+                    </div>
+                    {{!-- <div class="col-md-3 col-12 me-auto mb-md-0 mb-3">
+                        <select class="form-select" id="statusFilter">
+                            <option>All</option>
+                            <option>In Stock</option>
+                            <option>Out of Stock</option>
+                        </select>
+                    </div> --}}
+                    {{!-- <div class="col-md-2 col-6">
+                        <input type="date" value="02.05.2021" class="form-control">
+                    </div>
+                    <div class="col-md-2 col-6">
+                        <select class="form-select">
+                            <option selected>Status</option>
+                            <option>Active</option>
+                            <option>Disabled</option>
+                            <option>Show all</option>
+                        </select>
+                    </div> --}} -->
+                </div>
+            </header> <!-- card-header end// -->
+
+            <table class="table align-middle mb-0 bg-white">
+                <thead class="bg-light">
+                    <tr style="background-color: rgb(199, 210, 206);">
+                        <th>Product name</th>
+                        <th>category & sub category</th>
+                        <th>Description</th>
+                        <th>Color</th>
+                        <th>Price</th>
+                        <th>Total number</th>
+                        <th>Status</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody id="ordersContainer">
+                    <% for (let i = 0; i < products.length; i++) { %>
+                    <tr>
+                        <td>
+                            <div class="d-flex align-items-center">
+                                <img src="productImages/<%=products[i].images[0]%>" alt="" style="width: 45px; height: 45px"
+                                    class="rounded-circle" />
+                                <div class="ms-3">
+                                    <p class="fw-bold mb-1"><%=products[i].name%></p>
+                                </div>
+                            </div>
+                        </td>
+                        <td>
+                            <p class="fw-normal mb-1"><%=products[i].category%></p>
+                            <p class="text-muted mb-0"><%=products[i].subCategory%></p>
+                        </td>
+                        <td>
+                            <p class="fw-normal mb-1"><%=products[i].description%></p>
+                        </td>
+                        <td>
+                            <p class="fw-normal mb-1"><%=products[i].color%></p>
+                        </td>
+                        <td><%=products[i].price%></td>
+                        <td>
+                            <p class="fw-normal mb-1"><%=products[i].totalQty%></p>
+                        </td>
+                        <td>
+                            <% if (products[i].totalQty>0) { %>
+                            <span class="badge rounded-pill alert-success text-dark">In Stock</span>
+                            <% } else { %>
+                            <span class="badge rounded-pill alert-danger text-dark">Out of Stock</span>
+                            <% } %>
+                        </td>
+                        <td>
+                            <a href="/admin/edit-product/?id=<%=products[i]._id%>" class=" btn-sm font-sm rounded "
+                                >
+                                <i class="fa-solid fa-pen" style="color: #e100ff;"></i>
+                            </a>
+                            <div  class=" btn-sm font-sm  rounded"
+                                 onclick="productDelete('<%=products[i]._id%>')">
+                                <i class="fa-solid fa-trash" style="color: #f00000;"></i>
+                            </div>
+                        </td>
+                    </tr>
+                    <% } %>
+                </tbody>
+            </table>
+
+            <div id="paginationContainer" class="pagination d-flex justify-content-center">
+                <% if (currentPage > 1) { %>
+                <a href="/admin/products?page=<%= currentPage - 1 %>" class="page-link"
+                  ><i class="fa-solid fa-chevron-left" style="color: #000000"></i> Prev</a
+                >
+                <% } %> <% if (currentPage < totalPages) { %>
+                <a href="/admin/products?page=<%= currentPage + 1 %>" class="page-link"
+                  >Next <i class="fa-solid fa-chevron-right" style="color: #000000"></i
+                ></a>
+                <% } %>
+              </div>
+    </section> <!-- content-main end// -->
+
+   
+      
+      
+      
+</main>
+
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.0.19/dist/sweetalert2.all.min.js"></script>
+
+<script src="/assets/js/script.js"></script>
+
+

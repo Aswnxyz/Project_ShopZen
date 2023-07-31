@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ShopZen</title>
+      <!-- Template CSS -->
+      <link rel="shortcut icon" type="image/x-icon" href="assets/imgs/theme/favicon.svg">
+      <link rel="stylesheet" href="/assets/css/maind134.css?v=3.4">
+      <!-- <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-9ndCyUaIbzAi2FUVXJi0CjmCapSmO7SnpJef0486qhLnuZ2cdeRhO02iuK6FUUVM" crossorigin="anonymous"> -->
+      <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" integrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+      <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.1/jquery.min.js"></script>
+      <script src="https://code.jquery.com/jquery-3.7.0.min.js" integrity="sha256-2Pmvv0kuTBOenSvLm6bvfBSSHrUJ+3A7x6P5Ebd07/g=" crossorigin="anonymous"></script>   
+         <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11.0.19/dist/sweetalert2.min.css">
+      <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+      <!-- Add these links in the head section of your HTML file -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
+
+      <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
+
+</head>
+<body >
+
+
+ 
+    <% if (typeof admin !== 'undefined') { %>
+        <%- include ('../partials/admin-header'); -%>
+      <% } else { %>
+        <%- include ('../partials/user-header'); -%>
+      <% } %>
+      
+      <%- body %> 
+
+      <% if (typeof admin !== 'undefined') { %>
+        <%- include ('../partials/admin-footer'); -%>
+      <% } else { %>
+        <%- include ('../partials/user-footer'); -%>
+      <% } %>
+      
+ 
+ 
+ 
+ <!-- Vendor JS-->
+      <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+      <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
+      <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.0/js/bootstrap.min.js"></script>
+      <script src="/assets/js/vendor/modernizr-3.6.0.min.js"></script>
+      <script src="/assets/js/vendor/jquery-3.6.0.min.js"></script>
+      <script src="/assets/js/vendor/jquery-migrate-3.3.0.min.js"></script>
+      <script src="/assets/js/vendor/bootstrap.bundle.min.js"></script>
+      <script src="/assets/js/plugins/slick.js"></script>
+      <script src="/assets/js/plugins/jquery.syotimer.min.js"></script>
+      <script src="/assets/js/plugins/wow.js"></script>
+      <script src="/assets/js/plugins/jquery-ui.js"></script>
+      <script src="/assets/js/plugins/perfect-scrollbar.js"></script>
+      <script src="/assets/js/plugins/magnific-popup.js"></script>
+      <script src="/assets/js/plugins/select2.min.js"></script>
+      <script src="/assets/js/plugins/waypoints.js"></script>
+      <script src="/assets/js/plugins/counterup.js"></script>
+      <script src="/assets/js/plugins/jquery.countdown.min.js"></script>
+      <script src="/assets/js/plugins/images-loaded.js"></script>
+      <script src="/assets/js/plugins/isotope.js"></script>
+      <script src="/assets/js/plugins/scrollup.js"></script>
+      <script src="/assets/js/plugins/jquery.vticker-min.js"></script>
+      <script src="/assets/js/plugins/jquery.theia.sticky.js"></script>
+      <script src="/assets/js/plugins/jquery.elevatezoom.js"></script>
+      <!-- Template  JS -->
+      <script src="/assets/js/maind134.js?v=3.4"></script>
+      <script src="/assets/js/shopd134.js?v=3.4"></script>
+  
+</body>
+</html>

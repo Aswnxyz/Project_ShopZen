@@ -1,0 +1,69 @@
+<div class="container">
+  <h1 class="mt-5">Users</h1>
+  
+  <!-- <div class="mt-4">
+    <a href="/admin/new-user" class="btn btn-primary">Add New User</a>
+  </div> -->
+  
+  <div class="mt-4">
+    <form class="form-inline">
+      <div class="form-group">
+        <input type="search" class="form-control mr-2" placeholder="Search User name, email, mobile" name="search">
+      </div>
+      <button type="submit" class="btn btn-primary">Search</button>
+    </form>
+  </div>
+  
+  <div class="mt-4">
+    <table class="table table-striped">
+      <thead class="thead-light">
+        <tr>
+          <th>User ID</th>
+          <th>Name</th>
+          <th>Email</th>
+          <th>Mobile</th>
+          <th>Options</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% if (users.length > 0) { %>
+          <% for (let i = 0; i < users.length; i++) { %>
+            <tr>
+              <td><%= users[i]._id %></td>
+              <td><%= users[i].name %></td>
+              <td><%= users[i].email %></td>
+              <td><%= users[i].phone %></td>
+              <td>
+
+
+                <% if (users[i].is_active) { %>
+                  <!-- Code to be executed if the condition is true -->
+                  <a href="/admin/block-user?id=<%= users[i]._id %>" id="blockButton" class="btn btn-danger mr-2"  >Block</a>
+                <% } else{ %>
+                  <!-- Code to be executed if the condition is false -->
+                  <a href="/admin/unblock-user?id=<%= users[i]._id %>" id="blockButton" style="background-color: green;" class="btn btn-success mr-2"  >Unblock</a>
+
+                <% } %>
+                
+
+                <!-- <a href="/admin/block-user?id=<%= users[i]._id %>" id="blockButton" class="btn btn-danger mr-2"  >Block</a> -->
+                <!-- <a href="/admin/delete-user?id=<%= users[i]._id %>" class="btn btn-danger" onclick="return confirm('are you sure ?')" >Delete</a> -->
+              </td>
+            </tr>
+          <% } %>
+        <% } else { %>
+          <tr>
+            <td colspan="4" class="text-center">No users found.</td>
+          </tr>
+        <% } %>
+      </tbody>
+    </table>
+  </div>
+  
+  <div class="mt-4">
+    <a href="/admin/home" class="btn btn-secondary">Home</a>
+  </div>
+</div>
+
+
+

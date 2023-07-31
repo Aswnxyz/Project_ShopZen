@@ -1,0 +1,252 @@
+<!-- <main class="main-wrap">
+    <section class="content-main">
+        <div class="row">
+            <div class="col-9">
+                <div class="content-header">
+                    <h2 class="content-title">Add New Product</h2>
+                </div>
+
+            </div>
+            <div>
+                <% if (addProductSuccess) { %>
+                    <p class="alert alert-success mt-3 text-center" style="width: 75%;"><%=addProductSuccess%></p>
+                  <% }  %>
+            </div>
+            <div class="col-lg-6">
+                <div class="card mb-4">
+                    <div class="card-body">
+                        <form action="" method="post" enctype="multipart/form-data">
+                            <div class="mb-4">
+                                <label for="product_name" class="form-label">Product Name</label>
+                                <input type="text" placeholder="Type here" class="form-control" id="product_name"
+                                    name="name" required="">
+                            </div>
+                            <div class="mb-4">
+                                <label class="form-label">Full description</label>
+                                <textarea placeholder="Type here" class="form-control" rows="4" name="description"
+                                    required=""></textarea>
+                            </div>
+                            <div class="row"> -->
+                                <!-- <div class="col-lg-4">
+                                    <div class="mb-4">
+                                        <label class="form-label">Brand</label>
+                                        <div class="row gx-2">
+                                            <input placeholder="Brand" type="text" class="form-control" name="brand"
+                                                required="">
+                                        </div>
+                                    </div>
+                                </div> -->
+                                <!-- <div class="col-lg-4">
+                                    <div class="mb-4">
+                                        <label class="form-label">Color</label>
+                                        <input placeholder="Color" type="text" class="form-control" name="color"
+                                            required="">
+                                    </div>
+                                </div>
+                                <div class="col-lg-4">
+                                    <label class="form-label">Size</label>
+                                    <select class="form-select" name="size" required="">
+                                        <option> /n </option>
+                                        <option> 128 GB</option>
+                                        <option> 256 GB</option>
+                                        <option> 512 GB</option>
+                                        <option> 1 TB </option> -->
+                                        <!-- <option> XL </option>
+                                        <option> XXL </option> -->
+                                    <!-- </select>
+                                </div>
+                            </div>
+                            <div class="mb-4">
+                                <label class="form-label">Price</label>
+                                <input type="number" placeholder="Rs." class="form-control" id="product_name"
+                                    name="price" required="">
+                            </div>
+
+                            <div class="mb-4">
+                                <label class="form-label">Stock</label>
+                                <input type="number" placeholder="Total" class="form-control" id="product_name"
+                                    name="totalQty" required="">
+                            </div>
+
+                            <div class="card-header">
+                                <h4>Category</h4>
+                            </div>
+                            <div class="card-body">
+                                <div class="row gx-1">
+                                    <div class="col-sm-6 mb-3">
+                                        <label class="form-label">Main Category</label>
+                                        <select id="main-category" class="form-select" name="category" required="">
+                                            <option> Select</option>
+
+                                            <% for (let i = 0; i < category.length; i++) { %>
+                                                <option> <%=category[i].name %> </option>
+                                            <% } %> -->
+
+                                            <!-- <option> Men's Clothing </option>
+                                            <option> Women's Clothing </option>
+                                            <option> Kid's Clothing </option> -->
+                                        <!-- </select>
+                                    </div>
+                                    <div class="col-sm-6 mb-3">
+                                        <label class="form-label">Sub-category</label>
+                                        <select id="sub-category" class="form-select" name="subCategory" required="">
+                                            <!-- Subcategories will be loaded dynamically -->
+                                            <!-- <option> Select</option>
+
+                                            <% for (let i = 0; i < category.length; i++) { %>
+                                                <% for (let j = 0; j < category[i].subCategory.length; j++) { %>
+                                                    <option><%=category[i].subCategory[j]%></option>
+                                                <% } %>
+                                            <% } %>
+                                        </select>
+                                    </div>
+                                    <div class="card-header">
+                                        <h4>Media</h4>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="input-upload">
+                                            <img src="" alt="" id="imgView">
+                                            <input class="form-control" type="file" value="upload" name="images"
+                                                onchange="viewImage(event)" required="" multiple>
+                                        </div>
+                                    </div>
+                                </div> <!-- row.// -->
+                            <!-- </div>
+                            <div>
+                                <button type="submit" class="btn btn-md rounded font-sm hover-up">Submit</button>
+                            </div>
+
+                        </form>
+                    </div>
+                </div> <!-- card end// -->
+            <!-- </div>
+        </div>
+
+    </section> --> 
+
+    
+    <!-- <script>
+        // Set the value of the hidden input field to the current image URL
+        document.addEventListener('DOMContentLoaded', function() {
+            const currentImageUrl = document.getElementById('current_image_url').value;
+            document.getElementById('imgView').src = currentImageUrl;
+        });
+    
+        function viewImage(event) {
+            document.getElementById('imgView').src = URL.createObjectURL(event.target.files[0]);
+        }
+    </script> -->
+    
+
+
+    <main class="main-wrap">
+        <section class="content-main">
+          <div class="container">
+            <div class="row">
+              <div class="col-md-8 mx-auto">
+                <div class="card">
+                  <div class="card-header bg-primary">
+                    <h2 class="content-title text-center">Add New Product</h2>
+                  </div>
+                  <div class="card-body">
+                    <% if (addProductSuccess) { %>
+                      <p class="alert alert-success mt-3 text-center"><%=addProductSuccess%></p>
+                    <% } %>
+      
+                    <form action="" method="post" enctype="multipart/form-data">
+                      <div class="mb-3">
+                        <label for="product_name" class="form-label">Product Name</label>
+                        <input type="text" placeholder="Type here" class="form-control" id="product_name" name="name" required="">
+                      </div>
+      
+                      <div class="mb-3">
+                        <label class="form-label">Full Description</label>
+                        <textarea placeholder="Type here" class="form-control" rows="4" name="description" required=""></textarea>
+                      </div>
+      
+                      <div class="row">
+                        <div class="col-md-6 mb-3">
+                          <label class="form-label">Color</label>
+                          <input placeholder="Color" type="text" class="form-control" name="color" required="">
+                        </div>
+                        <div class="col-md-6 mb-3">
+                          <label class="form-label">Size</label>
+                          <select class="form-select" name="size" required="">
+                            <option value="">Select Size</option>
+                            <option value="128 GB">128 GB</option>
+                            <option value="256 GB">256 GB</option>
+                            <option value="512 GB">512 GB</option>
+                            <option value="1 TB">1 TB</option>
+                          </select>
+                        </div>
+                      </div>
+      
+                      <div class="mb-3">
+                        <label class="form-label">Price</label>
+                        <input type="number" placeholder="Rs." class="form-control" id="product_price" name="price" required="">
+                      </div>
+      
+                      <div class="mb-3">
+                        <label class="form-label">Stock</label>
+                        <input type="number" placeholder="Total" class="form-control" id="product_stock" name="totalQty" required="">
+                      </div>
+      
+                      <div class="mb-3">
+                        <label class="form-label">Category</label>
+                        <select id="main-category" class="form-select" name="category" required="">
+                          <option value="">Select Category</option>
+                          <% for (let i = 0; i < category.length; i++) { %>
+                            <option value="<%=category[i].name %>"><%=category[i].name %></option>
+                          <% } %>
+                        </select>
+                      </div>
+      
+                      <div class="mb-3">
+                        <label class="form-label">Sub-category</label>
+                        <select id="sub-category" class="form-select" name="subCategory" required="">
+                          <option value="">Select Sub-category</option>
+                          <% for (let i = 0; i < category.length; i++) { %>
+                            <% for (let j = 0; j < category[i].subCategory.length; j++) { %>
+                                <option><%=category[i].subCategory[j]%></option>
+                            <% } %>
+                        <% } %>
+                        </select>
+                      </div>
+                      <div class="mb-3">
+                        <label class="form-label">Media</label>
+                        <div class="input-upload">
+                          <!-- Image previews will be shown here -->
+                          <div id="image-previews"></div>
+                      
+                          <input class="form-control" type="file" name="images" onchange="viewImages(event)" required="" multiple>
+                        </div>
+                      </div>
+      
+                      <button type="submit" class="btn btn-primary bg-success">Submit</button>
+                    </form>
+                  </div>
+                </div> <!-- card end// -->
+              </div>
+            </div>
+          </div>
+        </section>
+      
+        <script>
+            // ... Your existing script code ...
+          
+            function viewImages(event) {
+              const imagePreviewsContainer = document.getElementById('image-previews');
+              imagePreviewsContainer.innerHTML = ''; // Clear previous previews
+          
+              const files = event.target.files;
+              for (let i = 0; i < files.length; i++) {
+                const img = document.createElement('img');
+                img.src = URL.createObjectURL(files[i]);
+                img.className = 'img-thumbnail';
+                img.style.width = '100px'; // Set a fixed width for image previews (adjust as needed)
+                imagePreviewsContainer.appendChild(img);
+              }
+            }
+          </script>
+          
+      

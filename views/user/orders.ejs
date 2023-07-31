@@ -1,0 +1,154 @@
+<main class="main">
+  <div class="page-header breadcrumb-wrap">
+    <div class="container">
+      <div class="breadcrumb">
+        <a href="/" rel="nofollow">Home</a>
+        <span></span> Shop <span></span> Orders
+      </div>
+    </div>
+  </div>
+  <section class="mt-50 mb-50">
+    <div class="container">
+      <div>
+        <h4 class="content-title card-title">Orders</h4>
+      </div>
+
+      <div class="container">
+    <div class="row">
+        <div class="col-md-8"> <!-- Adjust the column size as per your requirement -->
+            <form>
+                <div class="input-group">
+                    <input type="text" placeholder="Search order ID" class="form-control bg-white" name="orderId">
+                    <div class="input-group-append">
+                        <button type="submit" class="btn btn-md rounded font-sm">Search</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+<header class="card-header">
+  <div class="row gx-3">
+      <!-- {{!-- <div class="col-lg-4 col-md-6 me-auto">
+          <input type="text" placeholder="Search..." class="form-control">
+      </div> --}} -->
+      <div class="col-lg-2 col-6 col-md-3">
+          <select class="form-select" id="statusFilter">
+              <option>all</option>
+              <option>Pending</option>
+              <option>Placed</option>
+              <option>Cancelled</option>
+              <option>Recieved</option>
+              <option>Return</option>
+          </select>
+      </div>
+      <!-- {{!-- <div class="col-lg-2 col-6 col-md-3">
+          <select class="form-select">
+              <option>Show 20</option>
+              <option>Show 30</option>
+              <option>Show 40</option>
+          </select>
+      </div> --}} -->
+  </div>
+</header> 
+
+      <div class="col-12">
+        <div class="table-responsive">
+          <table class="table table-hover text-center">
+            <thead>
+              <tr
+                class="main-heading"
+                style="background-color: rgb(199, 210, 206)"
+              >
+                <th scope="col">Sl No.</th>
+                <th scope="col">OrderId</th>
+                <th scope="col">Total Price</th>
+                <th scope="col">Status</th>
+                <th scope="col">Action</th>
+              </tr>
+            </thead>
+            <tbody id="ordersContainer">
+              <% for(let i=0 ; i < orders.length ; i++) { %>
+              <tr>
+                <td><%=startingIndex + i %></td>
+                <td><%=orders[i].orderId%></td>
+                <td class="price" data-title="Price">
+                  <span>₹<%=orders[i].totalPrice%></span>
+                </td>
+                <td class="order-status text-right" data-title="Cart">
+                  <% if (orders[i].orderStatus == "placed") { %>
+                  <span class="badge rounded-pill alert-success">Placed</span>
+                  <% }else if (orders[i].orderStatus == "pending") { %>
+                  <span class="badge rounded-pill alert-warning">Pending</span>
+                  <% }else if (orders[i].orderStatus == "recieved") { %>
+                  <span class="badge rounded-pill alert-success">Recieved</span>
+                  <% }else if (orders[i].orderStatus == "cancelled") { %>
+                  <span class="badge rounded-pill alert-danger">Cancelled</span>
+                  <% }else if (orders[i].orderStatus == "returned") { %>
+                  <p style="color: red">Return initiated</p>
+                  <% } %>
+                </td>
+                <td class="text-right" data-title="Cart">
+                  <a
+                    href="/order-details?orderId=<%=orders[i].orderId%>"
+                    class="btn btn-md rounded font-sm"
+                    >View</a
+                  >
+                </td>
+              </tr>
+              <% } %>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!--  pagination  -->
+  <div class="pagination d-flex justify-content-center">
+    <% if (currentPage > 1) { %>
+    <a href="/orders?page=<%= currentPage - 1 %>" class="page-link"
+      ><i class="fa-solid fa-chevron-left" style="color: #000000"></i> Prev</a
+    >
+    <% } %> <% if (currentPage < totalPages) { %>
+    <a href="/orders?page=<%= currentPage + 1 %>" class="page-link"
+      >Next <i class="fa-solid fa-chevron-right" style="color: #000000"></i
+    ></a>
+    <% } %>
+  </div>
+</main>
+
+
+
+   
+
+<script>
+  $(document).ready(function () {
+      // Function to filter orders based on status
+      function filterOrdersByStatus(status) {
+          const ordersContainer = $("#ordersContainer");
+          const allRows = ordersContainer.find("tr");
+
+          allRows.each(function () {
+              const row = $(this);
+              const rowStatus = row.find(".order-status").text().trim().toLowerCase();
+
+              // Show/hide rows based on the selected status
+              if (status === "all" || rowStatus === status.toLowerCase()) {
+                  row.show();
+              } else {
+                  row.hide();
+              }
+          });
+      }
+
+      // Listen for changes to the status filter dropdown
+      $("#statusFilter").on("change", function () {
+          const selectedStatus = $(this).val(); // Get the selected status
+          filterOrdersByStatus(selectedStatus); // Filter the orders based on the selected status
+      });
+
+      // Initially, show all orders when the page loads
+      filterOrdersByStatus("all");
+  });
+</script>

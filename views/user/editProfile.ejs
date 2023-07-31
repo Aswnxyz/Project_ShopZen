@@ -1,0 +1,81 @@
+<script src="https://kit.fontawesome.com/1236d29865.js" crossorigin="anonymous"></script>
+<section>
+    <div class="container">
+        <div class="main-body">
+            <br>
+            <div>
+                <a href="/profile"><i class="fa-solid fa-arrow-left-long"></i> Go back</a>
+            </div>
+            <br>
+            <h3>Edit profile</h3>
+            <hr>
+            <div>
+                <% if (typeof message !== 'undefined') { %>
+                <p class="alert alert-success mt-3 text-center" style="width: 75%;"><%= message %></p>
+               <% } %> 
+            </div>
+            <div class="row gutters-sm">
+                <div class="col-md-8">
+                    <div class="card mb-3">
+                        <form action="/edit-profile?userId=<%=userData._id%>" method="post">
+
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-sm-3">
+                                        <h6 class="mb-0">Full Name</h6>
+                                    </div>
+                                    <div class="col-sm-9 text-secondary">
+                                        <input value="<%=userData.name%>" name="name" type="text" id="user-name"
+                                            onkeyup="">
+                                        <span id="name-error"></span>
+                                    </div>
+                                </div>
+                                <hr>
+                                <div class="row">
+                                    <div class="col-sm-3">
+                                        <h6 class="mb-0">Email</h6>
+                                    </div>
+                                    <div class="col-sm-9 text-secondary">
+                                        <input value="<%=userData.email%>" name="email" type="email" id="user-email"
+                                            onkeyup="">
+                                        <span id="email-error"></span>
+                                    </div>
+                                </div>
+                                <hr>
+                                <!-- {{!-- <div class="row">
+                                    <div class="col-sm-3">
+                                        <h6 class="mb-0">Phone</h6>
+                                    </div>
+                                    <div class="col-sm-9 text-secondary">
+                                        (239) 816-9029
+                                    </div>
+                                </div> --}}
+                                {{!--
+                                <hr> --}} -->
+                                <div class="row">
+                                    <div class="col-sm-3">
+                                        <h6 class="mb-0">Mobile</h6>
+                                    </div>
+                                    <div class="col-sm-9 text-secondary">
+                                        <input value="<%=userData.phone%>" name="phone" type="tel" id="user-phone"
+                                            onkeyup="">
+                                        <span id="phone-error"></span>
+                                    </div>
+                                </div>
+                                <hr>
+                                <div class="row">
+                                    <div class="col-sm-12">
+                                        <button type="submit" class="btn btn-md rounded font-sm hover-up"
+                                            onclick="">Save</button>
+                                        <span id="submit-error"></span>
+                                    </div>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</section>

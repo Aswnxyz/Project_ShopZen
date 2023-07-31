@@ -1,0 +1,99 @@
+<div class="container">
+  <h1 class="mt-5">Edit Category</h1>
+  
+  <div class="mt-4">
+    <form id="updateCategoryForm" action="/admin/editCategoryName?categoryName=<%=category.name%>" method="post" >
+
+      <div class="form-group">
+        <label for="name">Category:</label>
+        <input type="text" class="form-control border-secondary" name="updatedCategoryName" value="<%=category.name%>" placeholder="Enter Name">
+      </div>
+      <button type="submit" class="btn btn-primary" onclick="updateCategory('<%=category.name%>')">Update Category</button>
+    </form>
+  </div>
+
+  <table class="table bg-light">
+    <thead>
+      <tr>
+        <th scope="col">Subcategories</th>
+        <th scope="col">Edit</th>
+        <th scope="col">Delete</th>
+      </tr>
+    </thead>
+    <tbody>
+        <% for (let i = 0; i < category.subCategory.length; i++) { %>
+        <tr>
+          <form action="/admin/editProdutSubcategory?categoryName=<%=category.name%>&subcategoryName=<%=category.subCategory[i]%>" method="post">
+        <td>
+              <input type="text" class="form-control border-dark" name="updatedSubcategoryName" value="<%= category.subCategory[i] %>" placeholder="Enter Name" required>
+        </td>
+        <td><button style="background-color: blue;" type="submit" class="btn btn-primary" >Edit</button></td>
+          </form>
+        <td><button style="background-color: red;" class="btn btn-danger" onclick="return confirmDelete('<%=category.name%>','<%=category.subCategory[i]%>')">Delete</button></td>
+        </tr>
+      <% } %>
+    </tbody>
+  </table>
+
+  <a href="/admin/category">back</a>
+</div>
+
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.0.19/dist/sweetalert2.all.min.js"></script>
+
+<script src="/assets/js/script.js"></script>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
+
+<% if (typeof successMessage !== 'undefined') { %>
+  <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
+  <script>
+    // Display the toast message for a successful login
+    Toastify({
+      text: '<%= successMessage %>',
+      duration: 4000,
+      backgroundColor: '#1abc9c', // Green color for success
+      gravity: 'top', // Display the toast at the top of the screen
+      position: 'center', // Center the toast horizontally
+      stopOnFocus: true,
+    }).showToast();
+
+
+  </script>
+<% } %>
+
+
+
+<!-- <script>
+  function updateCategory(categoryName) {
+    const form = document.getElementById('updateCategoryForm');
+    const formData = new FormData(form);
+
+    fetch(`/admin/editCategoryName?categoryName=${categoryName}`, {
+      method: 'POST',
+      body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+      if (data.success) {
+        // Extract the updated category name from the response
+        const updatedCategoryName = data.updatedCategoryName;
+        showSuccessToast(`Category updated to ${updatedCategoryName}`, () => {
+          // If needed, perform any additional action after the toast is closed
+          // For example, you might want to reload the page or redirect to another URL
+          window.location.href = `/admin/editProductCategory?categoryName=${encodeURIComponent(updatedCategoryName)}`;
+        });
+      } else {
+        // Handle the case when the update was not successful (e.g., display an error message)
+        // You can show an error toast here if needed
+      }
+    })
+    .catch(error => {
+      console.error('Error updating category:', error);
+    });
+  }
+</script> -->
+
+
+
+

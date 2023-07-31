@@ -1,0 +1,387 @@
+
+<main class="main">
+    <div class="page-header breadcrumb-wrap">
+        <div class="container">
+            <div class="breadcrumb">
+                <a href="/" rel="nofollow">Home</a>
+                <span></span> Shop
+                <span></span> Orders
+                <span></span> Order details
+            </div>
+        </div>
+    </div>
+    <section class="mt-50 mb-50 ml-120 mr-120">
+        <div class="conatainer">
+
+            <div class="content-header">
+                <div>
+                    <h4 class="content-title card-title" onclick="formatDate()">Order detais</h4>
+                </div>
+            </div>
+            <div class="card">
+                <header class="card-header">
+                    <div class="row align-items-center">
+                        <div class="col-lg-6 col-md-6 mb-lg-0 mb-15">
+                            <span>
+                                <i class="material-icons md-calendar_today"></i> <b></b>
+                            </span> <br>
+                            Order ID: 
+                            <small id="order-id" class="text-muted"><%=orderDetails[0].orderId%></small>
+                        </div>
+                        <div class="col-lg-6 col-md-6 mb-lg-0 mb-15">
+                            <span>
+                                <i class="material-icons md-calendar_today"></i> <b></b>
+                            </span> <br>
+                            <small class="text-muted">Order Date: <span id="formattedDate"></span></small>
+                        </div>
+
+                        <div class="col-lg-6 col-md-6 ms-auto text-md-end">
+                            <% if ( orderDetails[0].orderStatus === "placed") { %>
+                            <button class="btn btn-sm" data-bs-toggle="modal" data-bs-target="#cancelModal"
+                                data-bs-whatever="@mdo">Cancel</button>
+                            <% } else if (orderDetails[0].orderStatus === "pending") { %>
+                            <button class="btn btn-sm" data-bs-toggle="modal" data-bs-target="#cancelModal"
+                                data-bs-whatever="@mdo">Cancel</button>
+                             <% } else if (orderDetails[0].orderStatus === "recieved") { %>
+
+                            <button id="returnButton" class="btn btn-sm" onclick="" data-bs-toggle="modal" data-bs-target="#returnModal"
+                                data-bs-whatever="@mdo">Return</button>
+                            <% } %>
+
+                            <!-- {{!-- for invoice --}}
+                            <a id="generate-invoice-button" class="btn btn-sm">Download invoice</a> -->
+
+                        </div>
+
+
+                    </div>
+                </header> <!-- card-header end// -->
+
+                <!-- {{!-- modal for returning order --}} -->
+                <div class="modal fade" id="returnModal" tabindex="-1" aria-labelledby="exampleModalLabel"
+                    aria-hidden="true">
+                    <div class="modal-dialog modal-dialog-centered">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title" id="exampleModalLabel">Reason for return</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                    aria-label="Close"></button>
+                            </div>
+                            <div class="ml-10">
+                                <!-- {{!-- reasons for returning --}} -->
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" name="flexRadioDefault"
+                                        id="flexRadioDefault1">
+                                    <label class="form-check-label" for="flexRadioDefault1">
+                                        Don't want the product anymore
+                                    </label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" name="flexRadioDefault"
+                                        id="flexRadioDefault2" checked>
+                                    <label class="form-check-label" for="flexRadioDefault2">
+                                        Quality of the product is not as expected
+                                    </label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" name="flexRadioDefault"
+                                        id="flexRadioDefault1">
+                                    <label class="form-check-label" for="flexRadioDefault1">
+                                        Recieved wrong item
+                                    </label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" name="flexRadioDefault"
+                                        id="flexRadioDefault2" checked>
+                                    <label class="form-check-label" for="flexRadioDefault2">
+                                        Don't like the size/fit of the product
+                                    </label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" name="flexRadioDefault"
+                                        id="flexRadioDefault1">
+                                    <label class="form-check-label" for="flexRadioDefault1">
+                                        Recieved a broken/damaged item
+                                    </label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" name="flexRadioDefault"
+                                        id="flexRadioDefault2" checked>
+                                    <label class="form-check-label" for="flexRadioDefault2">
+                                        Product is missing in the package
+                                    </label>
+                                </div>
+
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary"
+                                        data-bs-dismiss="modal">Close</button>
+                                    <button onclick="returnOrder('<%=orderDetails[0].orderId%>')"
+                                        class="btn btn-primary">Continue</button>
+                                </div>
+
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+
+
+                <!-- {{!-- modal for cancelling the order --}} -->
+                <div class="modal fade" id="cancelModal" tabindex="-1" aria-labelledby="exampleModalLabel"
+                    aria-hidden="true">
+                    <div class="modal-dialog modal-dialog-centered">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title" id="exampleModalLabel">Reason for cancel</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                    aria-label="Close"></button>
+                            </div>
+                            <div class="ml-10">
+                                <!-- {{!-- reasons for returning --}} -->
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" name="flexRadioDefault"
+                                        id="flexRadioDefault1">
+                                    <label class="form-check-label" for="flexRadioDefault1">
+                                        I want to change the address for the order
+                                    </label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" name="flexRadioDefault"
+                                        id="flexRadioDefault2" checked>
+                                    <label class="form-check-label" for="flexRadioDefault2">
+                                        I have purchased the product elsewhere
+                                    </label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" name="flexRadioDefault"
+                                        id="flexRadioDefault1">
+                                    <label class="form-check-label" for="flexRadioDefault1">
+                                        Need different size or color
+                                    </label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" name="flexRadioDefault"
+                                        id="flexRadioDefault2" checked>
+                                    <label class="form-check-label" for="flexRadioDefault2">
+                                        I have changed my mind
+                                    </label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" name="flexRadioDefault"
+                                        id="flexRadioDefault1">
+                                    <label class="form-check-label" for="flexRadioDefault1">
+                                        Price for the product has decreased
+                                    </label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" name="flexRadioDefault"
+                                        id="flexRadioDefault2" checked>
+                                    <label class="form-check-label" for="flexRadioDefault2">
+                                        Expected delivery time is very long
+                                    </label>
+                                </div>
+
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary"
+                                        data-bs-dismiss="modal">Close</button>
+                                    <button onclick="cancelOrder('<%=orderDetails[0].orderId%>')"
+                                        class="btn btn-primary">Continue</button>
+                                </div>
+
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+
+
+                <div class="card-body">
+                    <div class="row mb-50 mt-20 order-info-wrap">
+                        <div class="col-md-4">
+                            <article class="icontext align-items-start">
+                                <span class="icon icon-sm rounded-circle bg-primary-light">
+                                    <i class="text-primary material-icons md-place"></i>
+                                </span>
+                                <div class="text">
+                                    <h6 class="mb-1">Deliver to</h6>
+                                    <p class="mb-1">
+                                        Locality: <%=orderDetails[0].deliveryAddress.locality%>,
+                                        <%=orderDetails[0].deliveryAddress.area%>
+                                        <br>District: <%=orderDetails[0].deliveryAddress.district%> <br> Pin:
+                                        <%=orderDetails[0].deliveryAddress.pincode%>
+                                    </p>
+                                    <br>
+                                    <br>
+                                    <h6 class="mb-1">Payment Method:- <%=orderDetails[0].paymentMethod%></h6>
+                                </div>
+                            </article>
+                        </div> <!-- col// -->
+                    </div> <!-- row // -->
+                    <div class="row">
+                        <div class="col-lg-7">
+                            <div class="table-responsive">
+                                <table class="table">
+                                    <thead>
+                                        <tr style="background-color: rgb(199, 210, 206);">
+                                            <th width="40%">Product</th>
+                                            <th width="20%">Unit Price</th>
+                                            <th width="20%">Quantity</th>
+                                            <!-- {{!-- <th width="20%" class="text-end">Total</th> --}} -->
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <% for(let i=0 ; i < products.length ; i ++) { %>
+                                            <% const product = products[i].product %>
+                                        <tr>
+                                            <td>
+                                                <a class="itemside" href="#">
+                                                    <div class="left">
+                                                        <img src="productImages/<%=product.images[3]%>" width="40" height="40"
+                                                            class="img-xs" alt="Item">
+                                                    </div>
+                                                    <div class="info"><%=product.name%></div>
+                                                </a>
+                                            </td>
+
+                                            <td> ₹<%=product.price%> </td>
+                                            <td> <%=products[i].quantity%> </td>
+                                            <!-- {{!-- <td class="text-end"> $99.50 </td> --}} -->
+                                        </tr>
+                                        <% } %>
+                                    </tbody>
+                                    <tr>
+                                        <td colspan="4">
+                                            <article class="float-end">
+                                                <dl class="dlist">
+                                                    <dt>Grand total:</dt>
+                                                    <dd> <b class="h5">₹<%=orderDetails[0].totalPrice%></b> </dd>
+                                                </dl>
+                                                <dl class="dlist">
+                                                    <dt class="text-muted">Status:</dt>
+                                                    <dd>
+                                                        <span><%=orderDetails[0].orderStatus%></span>
+                                                    </dd>
+                                                </dl>
+                                            </article>
+                                        </td>
+                                    </tr>
+                                </table>
+
+                            </div> <!-- table-responsive// -->
+                        </div> <!-- col// -->
+                        <div class="col-lg-1"></div>
+                    </div>
+                </div> <!-- card-body end// -->
+            </div> <!-- card end// -->
+
+        </div>
+
+
+
+        <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.0.19/dist/sweetalert2.all.min.js"></script>
+
+        <script>
+            function isWithinReturnWindow(orderDate) {
+              // Your function logic here
+              const returnWindowDays = 3; // Change this to the number of days for the return window
+              const now = new Date();
+              const orderDateObj = new Date(orderDate);
+              orderDateObj.setDate(orderDateObj.getDate() + returnWindowDays);
+              return now <= orderDateObj;
+            }
+            
+            document.addEventListener('DOMContentLoaded', function() {
+              const returnButton = document.getElementById('returnButton');
+              const orderDate = '<%= orderDetails[0].createdAt %>'; // Inject the order date from EJS
+            
+              if (isWithinReturnWindow(orderDate)) {
+                returnButton.removeAttribute('disabled'); // Enable the button
+              } else {
+                returnButton.setAttribute('disabled', 'true'); // Disable the button
+              }
+            });
+            </script>
+            
+
+
+
+        <!-- <script>
+            function isWithinReturnWindow(orderDate) {
+              const returnWindowDays = 3; // Change this to the number of days for the return window
+              const now = new Date();
+              const orderDateObj = new Date(orderDate);
+              orderDateObj.setDate(orderDateObj.getDate() + returnWindowDays);
+              return now <= orderDateObj;
+            }
+            </script>
+             -->
+
+<script>
+    function formatDate(dateString) {
+        console.log('heyyy')
+        const options = { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit', second: '2-digit' };
+        const date = new Date(dateString);
+        return date.toLocaleString('en-GB', options);
+    }
+
+
+    document.addEventListener('DOMContentLoaded', function () {
+    const orderDate = '<%= orderDetails[0].createdAt %>'; // Get the order date from your template
+    const formattedDate = formatDate(orderDate);
+    document.getElementById('formattedDate').innerText = formattedDate;
+  });
+</script>
+
+
+
+        <!-- // cancel order -->
+        <script>
+            function cancelOrder(orderId) {
+    console.log(orderId)
+    $.ajax({
+        url: "/cancel-order",
+        data: {
+            orderId: orderId,
+        },
+        method: 'post',
+        success: (res) => {
+            swal.fire({
+                title: "Order cancelled!!",
+                text: `If you already payed the price it will be credited into your wallet shortly..`,
+                icon: "success",
+                button: "Ok!",
+            }).then(() => {
+                location.replace('/orders')
+        })
+        }
+    })
+}
+
+        </script>
+
+        <!-- return_Order -->
+        <script>
+            function returnOrder(orderId) {
+    console.log(orderId)
+    $.ajax({
+        url: "/return-order",
+        data: {
+            orderId: orderId,
+        },
+        method: 'post',
+        success: (res) => {
+            swal.fire({
+                title: "Order returned!!",
+                text: `If you already payed the price it will be credited into your wallet shortly..`,
+                icon: "success",
+                button: "Ok!",
+            }).then(() => {
+                location.replace('/orders')
+        })
+        }
+    })
+}
+
+        </script>
+
+       
