@@ -3,6 +3,7 @@ const Cart = require("../models/Cart");
 const Product = require("../models/Products");
 const Address = require("../models/Address");
 const Order = require("../models/Orders");
+const { json } = require("body-parser");
 const ObjectId = require('mongodb').ObjectId;
 
 
@@ -40,9 +41,11 @@ module.exports = {
         }
     },
 
+    //Add_To_Cart
     addToCart: async (req, res) => {
         try {
             const { productId } = req.query
+            console.log(productId)
             const quantity= req.query.quantity || 1
             const productObj = {
                 item: productId,
@@ -56,10 +59,22 @@ module.exports = {
                     await Cart.updateOne({ userId: userId, 'products.item': productId },
                         { $inc: { 'products.$.quantity': 1 } }
                     );
-                    res.redirect('/user-cart')
+                    const newCart= await Cart.findOne({userId:userId});
+                    const cartCount= newCart.products.length
+                    if (req.xhr){
+                        res.json({status:true,cartCount})
+                    }else{
+                        res.redirect('/user-cart')
+                    }
                 } else {
                     await Cart.updateOne({ userId: userId }, { $push: { products: productObj } });
-                    res.redirect('/user-cart')
+                    const newCart= await Cart.findOne({userId:userId});
+                    const cartCount= newCart.products.length
+                    if (req.xhr){
+                        res.json({status:true,cartCount})
+                    }else{
+                        res.redirect('/user-cart')
+                    }
                 }
 
             } else {
@@ -68,7 +83,13 @@ module.exports = {
                     products: [productObj]
                 });
                 await data.save();
-                res.redirect('/user-cart')
+                const newCart= await Cart.findOne({userId:userId});
+                const cartCount= newCart.products.length
+                if (req.xhr){
+                    res.json({status:true,cartCount})
+                }else{
+                    res.redirect('/user-cart')
+                }
             }
 
 

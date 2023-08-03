@@ -37,6 +37,8 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use('/',userRouter)
 app.use('/admin',adminRouter)
 
+
+
 app.listen(port,()=>{
     console.log("Server started to running ... http://localhost:3000")
 })

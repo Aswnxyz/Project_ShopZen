@@ -11,7 +11,8 @@ const ProductsSchema= new mongoose.Schema(
      category:{type:String,required:true},
      subCategory:{type:String,required:true},
      totalQty:{type:Number,required:true},
-     images:{type:Array,required:true}
+     images:{type:Array,required:true},
+     isActive:{type:Boolean,default:true}
     }
 );
 

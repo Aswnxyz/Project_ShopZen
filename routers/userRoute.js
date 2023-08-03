@@ -9,8 +9,10 @@ userRoute.use(expressLayouts)
 const sessionHandling=require('../middleware/session-handling')
 const isLoggedIn=require('../middleware/isLoggedIn')
 const cartCount=require('../middleware/cartCount');
+const wishlistCount=require('../middleware/wishlistCount');
 // userRoute.use(isLoggedIn.isLoggedInMiddleware)
 userRoute.use(cartCount.cartCountMiddelware)
+userRoute.use(wishlistCount.wishlistCountMiddelware)
 
 
 userRoute.set('views','./views/user')
@@ -50,6 +52,10 @@ userRoute.get('/delete-address',sessionHandling.checkingUser,userProfileControll
 //User_Change_Password
 userRoute.get('/change-password',sessionHandling.checkingUser,userProfileController.getChangePassword)
 userRoute.post('/change-password',userProfileController.postChangePassword)
+//Wishlist
+userRoute.get('/wishlist',sessionHandling.checkingUser,userController.getWishlist);
+userRoute.get('/add-wishlist',sessionHandling.checkingUser,userController.addToWishlist)
+userRoute.post('/deleteWishlistProduct',userController.deleteWishlist)
 //User_Cart
 userRoute.get('/user-cart',sessionHandling.checkingUser,cartController.getCart)
 userRoute.get('/user-add-to-cart',sessionHandling.checkingUser,cartController.addToCart);
@@ -68,7 +74,8 @@ userRoute.get('/order-details',sessionHandling.checkingUser,userController.Order
 //Cancel_Order
 userRoute.post("/cancel-order",userController.cancelOrder)
 //Return_Order
-userRoute.post("/return-order",userController.returnOrder)
+userRoute.post("/return-order",userController.returnOrder);
+// userRoute.get("*",(req,res)=> res.status(404).render('page-404'))
 
 
 

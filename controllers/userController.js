@@ -5,6 +5,7 @@ const bcrypt = require("bcrypt");
 const Category = require("../models/Category");
 const Products = require("../models/Products");
 const Orders = require("../models/Orders");
+const Wishlist = require("../models/Wishlist");
 const Cart = require("../models/Cart");
 const { query } = require("express");
 const { ObjectId } = require("mongodb");
@@ -317,6 +318,7 @@ const getProducts = async (req, res) => {
 
     const { category } = req.query;
     const query = { category: category };
+    query.isActive=true;
 
   let subCategory = '';
   
@@ -365,84 +367,33 @@ const getProducts = async (req, res) => {
   
   if (data.length === 0) {
     // Render the "No products found" page
+    if(req.xhr){
+      return res.json({data})
+
+    }
     return res.render("no-products-found");
   }
 
   const categoryList= await Category.find({name:category});
   // console.log('categoryList:',categoryList)
+  if(req.xhr){
+    return res.json({data, categoryList})
+  }
   res.render("products", { data, categoryList });
   
-    // const { category } = req.query;
-    // let subCategory = '';
-    // if (req.query.subCategory) {
-    //   subCategory = req.query.subCategory;
-    // }
-
-    // // Construct the query object based on the presence of subCategory
-    // const query = { category: category };
-    // if (subCategory) {
-    //   query.subCategory = subCategory;
-    // }
-
-    // const data = await Products.find(query);
-    // res.render("products", { data });
+   
   } catch (error) {
     console.log(error.message);
   }
 };
 
 
-// const filterProducts= async(req,res)=>{
-
-//   try {
-//     const priceLimit = req.body.price
-//   console.log(priceLimit)
-
-// // Step 1: Remove the currency symbol (₹) and any spaces
-// const sanitizedParams = priceLimit.replace(/₹|\s/g, '');
-
-// // Step 2: Split the sanitizedParams at the hyphen
-// const priceRange = sanitizedParams.split('-');
-
-// // Step 3: Convert the resulting substrings into numbers
-// const minPrice = parseInt(priceRange[0], 10);
-// const maxPrice = parseInt(priceRange[1], 10);
-
-// console.log(minPrice,maxPrice)
-
-// const { category } = req.query;
-// let subCategory = '';
-
-// if (req.query.subCategory) {
-//   subCategory = req.query.subCategory;
-// }
-
-
-// // Construct the query object based on the presence of subCategory and filtered price
-// const query = { category: category };
-
-// if (subCategory) {
-//   query.subCategory = subCategory;
-// }
-
-// if (minPrice && maxPrice) {
+// const filterProducts= async (req,res)=>{
+// try {
   
-//   // Add the price range to the query object
-//   query.price = { $gte: minPrice, $lte: maxPrice };
+// } catch (error) {
+  
 // }
-
-// console.log(query)
-// const data = await Products.find(query);
-
-// if (data.length === 0) {
-//   // Render the "No products found" page
-//   return res.render("no-products-found");
-// }
-// res.render("products", { data });
-
-//   } catch (error) {
-//     console.log(error.message)
-//   }
 // }
 
 
@@ -451,7 +402,10 @@ const viewProduct = async (req, res) => {
   try {
     const { id } = req.query;
     const product = await Products.findById({ _id: id });
-    res.render("productDetails", { product });
+    const wishlist= await Wishlist.findOne({userId:new ObjectId(req.session.user_id)});
+    console.log('wishlist::::', wishlist)
+    res.render("productDetails", { product, wishlist });
+
   } catch (error) {
     console.log(error.message);
   }
@@ -600,7 +554,111 @@ const returnOrder=async (req,res)=>{
 
 }
 
+//Wishlist
+const getWishlist=async (req,res)=>{
+  try {
+    const products = await Wishlist.aggregate([
+      { $match: { userId: new ObjectId(req.session.user_id) } },
+      { $unwind: "$products" },
+      {
+        $lookup: {
+          from: "products",
+          let: { productId: { $toObjectId: "$products" } },
+          pipeline: [
+            { $match: { $expr: { $eq: ["$_id", "$$productId"] } } },
+            {
+              $project: {
+                _id: 1,
+                item: "$_id",
+                quantity: "$totalQty",
+                name: 1,
+                images: 1,
+                price: 1,
+                description:1
+              }
+            }
+          ],
+          as: "product"
+        }
+      },
+      { $unwind: "$product" },
+      {
+        $project: {
+          _id: 0,
+          item: "$product.item",
+          quantity: "$product.quantity",
+          name: "$product.name",
+          images: "$product.images",
+          price: "$product.price",
+          description: "$product.description"
+        }
+      }
+    ]);
+    console.log(products)
+    res.render('wishlist',{products})
+  } catch (error) {
+    console.log(error.message)
+  }
+}
 
+//Add_To_Wishlist
+const addToWishlist= async (req,res)=>{
+  try {
+    console.log('coming on wishlist')
+
+    const {productId}=req.query;
+    const userId = req.session.user_id;
+    const userData = await Wishlist.findOne({userId:new ObjectId(userId)});
+    if(userData){
+      if(userData.products.includes(productId)){
+        await Wishlist.updateOne(
+          {userId:new ObjectId(userId)},
+          {$pull:{products:productId}}
+        );
+        const newWishlist = await Wishlist.findOne({userId:new ObjectId(userId)});
+        const wishlistLength=newWishlist.products.length;
+        res.json({status:false,wishlistLength})
+      }else{
+      userData.products.push(productId)
+      await userData.save();
+    const wishlistLength=userData.products.length;
+      res.json({status:true,wishlistLength})
+      }
+
+
+    }else{
+      const newWishlist = new Wishlist({
+        userId:userId,
+        products:[productId]
+      });
+      await newWishlist.save();
+      const wishlistLength=newWishlist.products.length;
+      res.json({status:true,wishlistLength})
+    }
+
+
+  } catch (error) {
+    console.log(error.message)
+  }
+}
+
+//Delete_Wishlist
+const deleteWishlist= async (req,res)=>{
+  try {
+    const {productId}=req.body;
+    const userId= req.session.user_id
+    console.log('product id ::::',productId)
+    await Wishlist.updateOne(
+      {userId:new ObjectId(userId)},
+      {$pull:{products:productId}}
+    );
+    const updatedWishlist= await Wishlist.findOne();
+    const wishlistLength=updatedWishlist.products.length;
+    res.json({ message: "Product deleted successfully" ,wishlistLength});
+  } catch (error) {
+    console.log(error.message)
+  }
+}
 
 
 
@@ -624,5 +682,8 @@ module.exports = {
   OrderDetails,
   cancelOrder,
   // filterProducts,
-  returnOrder
+  returnOrder,
+  getWishlist,
+  addToWishlist,
+  deleteWishlist
 };

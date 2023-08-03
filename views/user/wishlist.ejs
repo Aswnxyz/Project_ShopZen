@@ -1,0 +1,125 @@
+
+<main class="main">
+    <div class="page-header breadcrumb-wrap">
+        <div class="container">
+            <div class="breadcrumb">
+                <a href="index.html" rel="nofollow">Home</a>
+                <span></span> Shop
+                <span></span> Wishlist
+            </div>
+        </div>
+    </div>
+    <section class="mt-50 mb-50">
+        <div class="container">
+            <div class="row">
+                <div class="col-12">
+                    <div class="table-responsive">
+                        <table class="table shopping-summery text-center">
+                            <thead>
+                                <tr class="main-heading">
+                                    <th scope="col" colspan="2">Product</th>
+                                    <th scope="col">Price</th>
+                                    <th scope="col">Stock Status</th>
+                                    <th scope="col">Action</th>
+                                    <th scope="col">Remove</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <% for(let i =0 ; i < products.length ; i ++) { %>
+                                <tr>
+                                    <td class="image product-thumbnail"><img src="productImages/<%=products[i].images[3]%>" alt=""></td>
+                                    <td class="product-des product-name">
+                                        <h5 class="product-name"><a href="/productDetails?id=<%=products[i].item%>"><%=products[i].name%></a></h5>
+                                        <!-- <p class="font-xs text-truncate"><%=products[i].description%></p> -->
+                                    </td>
+                                    <td class="price" data-title="Price"><span>₹ <%=products[i].price%></span></td>
+                                    <td class="text-center" data-title="Stock">
+                                        <% if (products[i].quantity) { %>
+                                        <span class="color3 font-weight-bold">In Stock</span>
+                                        <% }else{ %>
+                                         <span class="color3 font-weight-bold">Out Of Stock</span>
+                                         <% } %>
+                                    </td>
+                                    <td class="text-right" data-title="Cart">
+                                        <% if (products[i].quantity) { %>
+                                            <a href="/user-add-to-cart?productId=<%=products[i].item%>" class="btn btn-sm"><i class="fi-rs-shopping-bag mr-5"></i>Add to cart</a>
+                                            <% }else{ %>
+                                                <button class="btn btn-sm" style="pointer-events: none;opacity: 0.5;"><i class="fi-rs-shopping-bag mr-5"></i>Add to cart</button>
+                                                <% } %>
+                                    </td>
+                                    <td class="action" data-title="Remove"><a class="delete-product" data-product-id="<%=products[i].item%>"><i class="fi-rs-trash"></i></a></td>
+                                </tr>
+                               <% } %>
+                            </tbody>
+                            <% if(products.length===0) { %>
+                                <h5>Wishlist is empty</h5>
+                                <br>
+                                <% } %>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</main>
+
+
+
+<!-- //Delete_From_Wishlist -->
+<script>
+$(document).ready(function () {
+ $(".delete-product").on("click", function (event) {
+   console.log('rrrrrrrr')
+   event.preventDefault();
+   var productId = $(this).data("product-id");
+   var deleteButton = $(this);
+
+   // Show SweetAlert confirmation dialog
+   Swal.fire({
+     title: 'Are you sure?',
+     text: "You won't be able to revert this!",
+     icon: 'warning',
+     showCancelButton: true,
+     confirmButtonColor: '#3085d6',
+     cancelButtonColor: '#d33',
+     confirmButtonText: 'Yes, delete it!'
+   }).then((result) => {
+     if (result.isConfirmed) {
+       // If the user confirms, make the AJAX request to delete the product
+       $.ajax({
+         url: "/deleteWishlistProduct", // The route to your Express server
+         type: "POST",
+         data: { productId: productId }, // Send the product ID in the request body
+         success: function (response) {
+           // If the server returns a successful response, remove the product row from the table
+           if (response.message === "Product deleted successfully") {
+            const wishlistCount = response.wishlistLength;
+            updateWishlistCountInDOM(wishlistCount);
+             // Remove the product row with SweetAlert success message
+             Swal.fire(
+               'Deleted!',
+               'Your file has been deleted.',
+               'success'
+             ).then(() => {
+               deleteButton.closest("tr").remove();
+             });
+           }
+         },
+         error: function (xhr, status, error) {
+           // Handle error, if any
+           console.log("Error:", error);
+         },
+       });
+     }
+   });
+ });
+});
+
+function updateWishlistCountInDOM(wishlistCount) {
+  const wishlistCountElement = document.querySelector("#wish-count");
+  if (wishlistCountElement) {
+    wishlistCountElement.textContent = wishlistCount.toString();
+  }
+}
+
+</script>

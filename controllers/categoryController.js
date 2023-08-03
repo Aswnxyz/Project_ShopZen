@@ -5,24 +5,29 @@ module.exports={
  
     categoryLoad: async (req,res)=>{
         try {
-            const successMessage = req.session.successMessage;
-            if (successMessage) {
+            let successMessage ='';
+            if (req.session.successMessage) {
               // Clear the success message from the session to prevent showing it again on page refresh
+              successMessage= req.session.successMessage
               delete req.session.successMessage;
             }
-            const {message,subMessage} = req.query
+            const {message,subMessage} = req.query;
+            if(subMessage){
+                successMessage=subMessage
+            }
             let search="";
             if(req.query.search){
                 search=req.query.search
             }
             const category= await Category.find({
+                isActive:true,
                 $or: [
     
                     {name:{$regex:'.*'+search+'.*',$options:'i'}},
                     {subCategory:{$regex:'.*'+search+'.*',$options:'i'}}
                 ]
             });
-            res.render('category',{successMessage,category,admin:true,message,subMessage})
+            res.render('category',{successMessage,category,admin:true,message})
         } catch (error) {
             console.log(error.message)
         }
@@ -31,18 +36,30 @@ module.exports={
     addProductCategory: async (req,res)=>{
         try {
             const {categoryName} = req.body;
-            // console.log(req.body)
-            const existingCategory= await Category.find({name:categoryName});
+            console.log(req.body)
+            const existingCategory= await Category.find({name:categoryName,isActive:true});
             // console.log(existingCategory)
             if(existingCategory.length){
                 // res.json({res:false})
                 res.redirect('/admin/category?message=Category already exists!');
             }else{
-                
-                const newCategory = new Category({
-                    name:categoryName
-                });
-                await newCategory.save();
+                const softDeleted = await Category.find({name:categoryName})
+                console.log('softdelte :::',softDeleted)
+                if(softDeleted.length){
+                    await Category.updateOne(
+                        {name:categoryName},
+                        {$set:{isActive:true}}
+                    );
+                    console.log('erroororoorororooror')
+                }else{
+                    console.log('workingdnc')
+                    const newCategory = new Category({
+                        name:categoryName
+                    });
+                    await newCategory.save();
+    
+                }
+               
                 req.session.successMessage = 'New Category added successfully!'; 
                 res.redirect('/admin/category');
                 // res.json({res:true})
@@ -78,7 +95,10 @@ module.exports={
     deleteProductCategory: async (req,res)=>{
         try {
             const {categoryName}=req.query;
-            await Category.deleteOne({name:categoryName});
+            await Category.updateOne(
+                {name:categoryName},
+                {$set:{isActive:false}}
+                );
             res.redirect('/admin/category')
 
         } catch (error) {

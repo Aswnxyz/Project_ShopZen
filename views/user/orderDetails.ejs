@@ -48,6 +48,8 @@
                                 data-bs-whatever="@mdo">Return</button>
                             <% } %>
 
+                            <div id="returnValidityDate" class="text-muted"></div>
+
                             <!-- {{!-- for invoice --}}
                             <a id="generate-invoice-button" class="btn btn-sm">Download invoice</a> -->
 
@@ -280,7 +282,7 @@
 
         <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.0.19/dist/sweetalert2.all.min.js"></script>
 
-        <script>
+        <!-- <script>
             function isWithinReturnWindow(orderDate) {
               // Your function logic here
               const returnWindowDays = 3; // Change this to the number of days for the return window
@@ -300,7 +302,41 @@
                 returnButton.setAttribute('disabled', 'true'); // Disable the button
               }
             });
+            </script> -->
+
+
+
+            <script>
+                function isWithinReturnWindow(orderDate) {
+                    // Your function logic here
+                    const returnWindowDays = 3; // Change this to the number of days for the return window
+                    const now = new Date();
+                    const orderDateObj = new Date(orderDate);
+                    orderDateObj.setDate(orderDateObj.getDate() + returnWindowDays);
+                    return now <= orderDateObj;
+                }
+            
+                document.addEventListener('DOMContentLoaded', function () {
+                    const returnButton = document.getElementById('returnButton');
+                    const returnValidityDate = document.getElementById('returnValidityDate');
+                    const orderDate = '<%= orderDetails[0].createdAt %>'; // Inject the order date from EJS
+            
+                    if (isWithinReturnWindow(orderDate)) {
+                        returnButton.removeAttribute('disabled'); // Enable the button
+                        const returnWindowDays = 3; // Change this to the number of days for the return window
+                        const orderDateObj = new Date(orderDate);
+                        orderDateObj.setDate(orderDateObj.getDate() + returnWindowDays);
+            
+                        const options = { day: '2-digit', month: '2-digit', year: 'numeric' };
+                        const formattedReturnDate = `Return valid until: ${orderDateObj.toLocaleDateString('en-GB', options)}`;
+                        returnValidityDate.innerText = formattedReturnDate;
+                    } else {
+                        returnButton.setAttribute('disabled', 'true'); // Disable the button
+                        returnValidityDate.innerText = 'Return window has expired';
+                    }
+                });
             </script>
+            
             
 
 

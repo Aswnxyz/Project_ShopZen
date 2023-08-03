@@ -81,4 +81,57 @@
     }
 
     
-  
+    //Add_To_Wishlist
+   function addToWishlist(productId){
+    $.ajax({
+      url: `/add-wishlist?productId=${productId}`,
+      method: 'get',
+      success: (response) => {
+          const wishlistButton = document.getElementById(`wishlistButton_${productId}`);
+          const wishlistCount = response.wishlistLength
+            updateWishlistCountInDOM(wishlistCount);
+
+          if (response.status) {
+            
+            wishlistButton.classList.remove('action-btn', 'hover-up');
+            wishlistButton.style.backgroundColor='#088178';
+            wishlistButton.style.border='1px solid transparent';
+            wishlistButton.style.color='white';
+
+              Swal.fire({
+                  title: "Successfull!",
+                  text: `Product added to wishlist`,
+                  icon: "success",
+                  button: "Ok!",
+              })
+          } else {
+            wishlistButton.style = ''; // Remove inline styles
+            wishlistButton.classList.add('action-btn', 'hover-up');
+            Toastify({
+              text: 'Product removed from wishlist. ',
+              duration: 3000,
+              backgroundColor: '#ffa500', 
+              gravity: 'top', // Display the toast at the top of the screen
+              position: 'center', // Center the toast horizontally
+              stopOnFocus: true,
+            }).showToast();
+          }
+        
+      
+      },
+      error: ( error) => {
+        // Handle AJAX request error, if any
+        console.log('AJAX request error:', error);
+        window.location.href='/login'
+      
+      }
+  })
+  function updateWishlistCountInDOM(wishlistCount) {
+    const wishlistCountElement = document.querySelector("#wish-count");
+    if (wishlistCountElement) {
+      wishlistCountElement.textContent = wishlistCount.toString();
+    }
+  }
+   };
+
+

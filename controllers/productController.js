@@ -19,6 +19,7 @@ module.exports={
                 search=req.query.search
             }
             const products= await Product.find({
+                isActive:true,
                 $or: [
     
                     {name:{$regex:'.*'+search+'.*',$options:'i'}},
@@ -47,7 +48,7 @@ module.exports={
     deleteProduct: async (req,res)=>{
         try {
             const productId=req.query.id;
-            await Product.deleteOne({_id:productId});
+            await Product.updateOne({_id:productId},{$set:{isActive:false}});
             res.redirect('/admin/products')
         } catch (error) {
             console.log(error.message)
@@ -97,19 +98,29 @@ await Product.updateOne(
             const images = req.files.map(file => path.basename(file.path));
             
             console.log(req.body);
+            const softDeleted= await Product.findOne({name:req.body.name});
+            console.log('produvyjkgjdfsgjkdfngvndfjkgnfdklgfdngfkg',softDeleted)
+            if(softDeleted){
+                await Product.updateOne(
+                    {name:req.body.name},
+                    {$set:{isActive:true}}
+                )
+            }else{
+                const product = new Product({
+                    name:req.body.name,
+                    description:req.body.description,
+                    price:req.body.price,
+                    size:req.body.size,
+                    color:req.body.color,
+                    category:req.body.category,
+                    subCategory:req.body.subCategory,
+                    totalQty:req.body.totalQty,
+                    images:images
+                });
+                await product.save();
+            }
+
            
-            const product = new Product({
-                name:req.body.name,
-                description:req.body.description,
-                price:req.body.price,
-                size:req.body.size,
-                color:req.body.color,
-                category:req.body.category,
-                subCategory:req.body.subCategory,
-                totalQty:req.body.totalQty,
-                images:images
-            });
-            await product.save();
             res.redirect('/admin/add-product?addProductSuccess=Product%20added%20successfully!')
         } catch (error) {
             console.log(error.message)

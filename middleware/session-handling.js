@@ -2,9 +2,17 @@
 module.exports={
     checkingUser:(req,res,next)=>{
         if(req.session.user_id){
+            console.log('hshgcfc')
             next()
         }else{
-            res.redirect('/login')
+
+            if (req.xhr) {
+                // If it's an AJAX request, send a 401 Unauthorized response with JSON data
+                res.status(401).json({ redirectUrl: '/login' });
+              } else {
+                // If it's a normal request, perform a redirect to the login page
+                res.redirect('/login');
+              }
         }
     },
 

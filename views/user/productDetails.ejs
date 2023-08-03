@@ -134,10 +134,28 @@
                                             <a href="#" class="qty-up"><i class="fi-rs-angle-small-up"></i></a>
                                         </div>
                                         <div class="product-extra-link2">
+
+                                            <% if (product.totalQty) { %>
                                             
                                             <button type="submit" class="button button-add-to-cart"onclick="redirectToCart()">Add to cart</button>
+
+                                            <% } else { %>
+
+                                                <button type="submit" class="button button-add-to-cart" style="background-color: black;"><i class="fa-solid fa-battery-empty" style="color: #ffffff;"></i> Out of stock</button>
+
+                                                <% } %>
+
+                                                                                        
+                                            <% if (wishlist && wishlist.products.includes(product._id)) { %>
+                                                <!-- Render this button if the product is already in the wishlist -->
+                                                <a aria-label="Add To Wishlist" id="wishlistButton_<%= product._id %>" style="background-color: #088178; border: 1px solid transparent;color: white;" onclick="addToWishlist('<%=product._id%>')" ><i class="fi-rs-heart"></i></a>
+                                                <% } else { %>
+                                                <!-- Render this button if the product is not in the wishlist -->
+                                                <a aria-label="Add To Wishlist" id="wishlistButton_<%= product._id %>" class="action-btn hover-up" onclick="addToWishlist('<%=product._id%>')"><i class="fi-rs-heart"></i></a>
+                                                <% } %>
                                             
-                                            <a aria-label="Add To Wishlist" class="action-btn hover-up" href="shop-wishlist.html"><i class="fi-rs-heart"></i></a>
+
+
                                             <a aria-label="Compare" class="action-btn hover-up" href="shop-compare.html"><i class="fi-rs-shuffle"></i></a>
                                         </div>
                                     </div>

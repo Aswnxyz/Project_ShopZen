@@ -18,7 +18,7 @@
     <div class="form-group">
       <label for="categoryName">Category Name:</label>
       <div id="messageContainer"></div>
-      <input type="text" class="form-control bg-light border-secondary" id="categoryName" name="categoryName" required>
+      <input type="text" class="form-control bg-light border-secondary" placeholder="Enter category name" id="categoryName" name="categoryName" required>
     </div>
     <button type="submit" class="btn btn-primary"style="background-color:Green"  >Add Category</button>
   </form>
@@ -65,7 +65,7 @@
             </ul>
             <form class="form-inline mt-2" action="/admin/add-subcategory?categoryName=<%= category[i].name %>" method="post">
               <div class="form-group">
-                <input type="text" class="form-control mr-2 border-secondary" id="subcategoryName" name="subcategoryName" required>
+                <input type="text" class="form-control mr-2 border-secondary" placeholder="Enter subcategory name" id="subcategoryName" name="subcategoryName" required>
               </div>
               <button type="submit" style="background-color: rgb(5, 147, 5);" class="btn btn-primary">Add Subcategory</button>
             </form>
@@ -91,7 +91,7 @@
     Toastify({
       text: '<%= successMessage %>',
       duration: 4000,
-      backgroundColor:message.startsWith('New Category')? '#3498db':'#00FF00', 
+      backgroundColor:message.startsWith('New')? '#1abc9c':'#ff0000', 
       gravity: 'top', // Display the toast at the top of the screen
       position: 'center', // Center the toast horizontally
       stopOnFocus: true,

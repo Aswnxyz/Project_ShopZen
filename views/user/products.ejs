@@ -15,7 +15,7 @@
             <div class="totall-product">
               <p>
                 We found
-                <strong class="text-brand"><%=data.length%></strong> items for
+                <strong class="text-brand" id="total-items"><%=data.length%></strong> items for
                 you!
               </p>
             </div>
@@ -62,9 +62,9 @@
               </div>
             </div>
           </div>
+          
+          <div id="filtered-results">
           <div class="row product-grid-3">
-
-
             <% for (let i = 0; i < data.length; i++) { %>
               <div class="col-lg-3 col-md-4 col-12 col-sm-6">
                 <div class="product-cart-wrap mb-30">
@@ -131,14 +131,25 @@
                       <span>&#8377; <%=data[i].price %> </span>
                       <span class="old-price">&#8377; <%=Math.floor(1.25 * data[i].price) %></span>
                     </div>
+                    <% if (data[i].totalQty) { %>
                     <div class="product-action-1 show">
                       <a
                         aria-label="Add To Cart"
                         class="action-btn hover-up"
-                        href="/user-add-to-cart?productId=<%=data[i]._id%>"
+                        onclick="addToCart('<%=data[i]._id%>')"
                         ><i class="fi-rs-shopping-bag-add"></i
                       ></a>
                     </div>
+                    <% }else { %>
+                      <div class="product-action-1 show">
+                      <a
+                      aria-label="Add To Cart"
+                      class="action-btn hover-up bg-dark"
+                      onclick="outOfStock()"
+                      ><i class="fi-rs-shopping-bag-add"></i
+                    ></a>
+                    </div>
+                      <% } %>
                   </div>
                 </div>
               </div>
@@ -169,6 +180,7 @@
                                 <% } %>
                             </div>
                         </div> -->
+          </div>
           </div>
           <!-- pagination-->
           <div class="pagination-area mt-15 mb-sm-5 mb-lg-0">
@@ -224,7 +236,8 @@
             </ul>
           </div>
           <!-- Fillter By Price -->
-          <form action="/getProducts?category=<%=data[0].category%>" class="sidebar-widget price_range range mb-30" method="post">
+          <div id="filter-container">
+          <form id="filterForm" action="/getProducts?category=<%=data[0].category%>" class="sidebar-widget price_range range mb-30" method="post">
             <div class="widget-header position-relative mb-20 pb-10">
               <h5 class="widget-title mb-10">Fill by price</h5>
               <div class="bt-1 border-color-1"></div>
@@ -252,7 +265,7 @@
                   <% for (let i = 0; i < categoryList.length; i++) { %>
                     <% for (let j = 0; j < categoryList[i].subCategory.length; j++) { %>
                       <input
-                        class="form-check-input"
+                        class="form-check-input brand-chekbox"
                         type="checkbox"
                         name="subCategory"
                         id="<%= categoryList[i].subCategory[j] %>"
@@ -308,6 +321,7 @@
               ><i class="fi-rs-filter mr-5"></i> Fillter</button
             >
           </form>
+        </div>
           <!-- Product sidebar Widget -->
           <!-- <div class="sidebar-widget product-sidebar  mb-30 p-30 bg-grey border-radius-10">
                         <div class="widget-header position-relative mb-20 pb-10">
@@ -364,6 +378,206 @@
     </div>
   </section>
 </main>
+
+
+
+<script>
+   function addToCart(productId){
+    console.log('sdfbsdhfhbsrdfijsdbfkhjjfnsffrfsdf')
+    $.ajax({
+      url: `/user-add-to-cart?productId=${productId}`,
+      method: 'get',
+      success: (response) => {
+          
+
+          if (response.status) {
+          const cartCount = response.cartCount
+            updateCartCountInDOM(cartCount);
+            
+             Toastify({
+              text: 'Product added to Cart. ',
+              duration: 3000,
+              backgroundColor: '#c0c0c', 
+              gravity: 'top', // Display the toast at the top of the screen
+              position: 'center', // Center the toast horizontally
+              stopOnFocus: true,
+            }).showToast();
+              
+          } else {
+            
+           
+          }
+        
+      
+      },
+      error: ( error) => {
+        // Handle AJAX request error, if any
+        console.log('AJAX request error:', error);
+        window.location.href='/login'
+
+      
+      }
+  })
+  function updateCartCountInDOM(cartCount) {
+    const cartCountElement = document.querySelector("#cart-count");
+    if (cartCountElement) {
+      cartCountElement.textContent = cartCount.toString();
+    }
+  }
+   };
+
+
+</script>
+
+<script>
+  function outOfStock(){
+    Toastify({
+              text: 'Out Of Stock ! ',
+              duration: 3000,
+              backgroundColor: '#ff0000', 
+              gravity: 'top', // Display the toast at the top of the screen
+              position: 'center', // Center the toast horizontally
+              stopOnFocus: true,
+            }).showToast();
+  }
+</script>
+
+
+
+
+<!-- Retain filter, sort and pagination states on result page -->
+<script>
+  $(document).ready(function () {
+    $('#filterForm').submit(function (event) {
+      event.preventDefault();
+
+      $.ajax({
+        type: 'POST',
+        url: $(this).attr('action'),
+        data: $(this).serialize(),
+        dataType: 'json', // Expect JSON response
+        success: function (response) {
+          // Handle the JSON response to update the filtered results
+          updateFilteredResults(response.data, response.categoryList);
+        }
+      });
+    });
+
+    // Function to update the filtered results on the page
+    function updateFilteredResults(data, categoryList) {
+      // Assuming you have an element with the ID 'filtered-results'
+      const filteredResults = $('#filtered-results');
+      const row = $('<div class="row product-grid-3"></div>');
+      const totalItemsElement = $('#total-items');
+      const paginationArea = $('.pagination-area');
+
+      // Clear previous content
+      filteredResults.empty();
+
+      // Update the filtered results with the new data
+      // You can generate the HTML structure for products here
+      // For example:
+      if(data.length===0){
+        filteredResults.append(`
+        <div class="container mt-5">
+  <div class="row justify-content-center">
+    <div class="col-md-6 text-center">
+      <h2 class="mb-3">No Results Found</h2>
+      <p class="lead">We couldn't find any matching products.</p>
+      <p>Please try adjusting your filters or explore other categories.</p>
+      <a href="/" class="btn btn-primary">Back to Home</a>
+    </div>
+  </div>
+</div>
+
+      `);
+      totalItemsElement.text(0);
+  paginationArea.hide()
+      }else{
+      data.forEach(product => {
+        const productColumn = $(`
+          
+            <div class="col-lg-3 col-md-4 col-12 col-sm-6">
+                <div class="product-cart-wrap mb-30">
+                  <div class="product-img-action-wrap">
+                    <div class="product-img product-img-zoom" style="width: auto;height: 270px;object-fit: cover;">
+                      <a href="/productDetails?id=${product._id}">
+                        <img
+                          class="default-img"
+                          src="productImages/${product.images[3]}"
+                          alt=""
+                        />
+                        <img
+                          class="hover-img"
+                          src="productImages/${product.images[2]}"
+                          alt=""
+                        />
+                      </a>
+                    </div>
+                    <div class="product-action-1">
+                      <a
+                        aria-label="Quick view"
+                        class="action-btn hover-up"
+                        data-bs-toggle="modal"
+                        data-bs-target="#quickViewModal"
+                      >
+                        <i class="fi-rs-search"></i
+                      ></a>
+                      <a
+                        aria-label="Add To Wishlist"
+                        class="action-btn hover-up"
+                        href="#"
+                        ><i class="fi-rs-heart"></i
+                      ></a>
+                    </div>
+                    <div
+                      class="product-badges product-badges-position product-badges-mrg"
+                    >
+                    </div>
+                  </div>
+                  <div class="product-content-wrap">
+                    <div class="card-body text-truncate"> 
+                        <h5 class="card-title">${product.name}</h5>
+                       </div>
+                       <div class="product-price">
+                      <span>&#8377; ${product.price} </span>
+                      <span class="old-price">&#8377; ${Math.floor(1.25 * product.price)} %></span>
+                    </div>
+                    ${
+                  product.totalQty
+                    ? `<div class="product-action-1 show">
+                        <a
+                          aria-label="Add To Cart"
+                          class="action-btn hover-up"
+                          onclick="addToCart('${product._id}')"
+                        ><i class="fi-rs-shopping-bag-add"></i></a>
+                      </div>`
+                    : `<div class="product-action-1 show">
+                        <a
+                          aria-label="Add To Cart"
+                          class="action-btn hover-up bg-dark"
+                          onclick="outOfStock()"
+                        ><i class="fi-rs-shopping-bag-add"></i></a>
+                      </div>`
+                }
+                    </div>
+                </div>
+              </div>
+        `);
+        row.append(productColumn);
+      });
+      filteredResults.append(row);
+      totalItemsElement.text(data.length);
+    }
+
+      // Update other parts of the page as needed, e.g., category filters
+      // You can use the categoryList data to update the category filters
+    }
+  });
+</script>
+
+
+
 
 
 
