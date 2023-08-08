@@ -37,6 +37,8 @@ userRoute.post('/setPassword',userController.verifyPassword);
 //Get_Products
 userRoute.get('/getProducts',userController.getProducts);
 userRoute.post('/getProducts',userController.getProducts);
+//Search_Products
+userRoute.get('/productSearch',userController.productSearch)
 //Filter_Products
 // userRoute.post('/filter-products',userController.filterProducts)
 //Product_Details
@@ -67,7 +69,9 @@ userRoute.get('/delete-from-cart',sessionHandling.checkingUser,cartController.de
 userRoute.get('/user-checkout',sessionHandling.checkingUser,cartController.getCheckout)
 userRoute.get('/landing-page',sessionHandling.checkingUser,cartController.getLanding)
 //Place_Order
-userRoute.post('/place-order',sessionHandling.checkingUser,cartController.placeOrder);
+userRoute.post('/place-order',cartController.placeOrder);
+//Verify_Payment
+userRoute.post('/verify-payment',cartController.verifyPayment)
 //User_Orders & Details
 userRoute.get('/orders',sessionHandling.checkingUser,userController.getOrders)
 userRoute.get('/order-details',sessionHandling.checkingUser,userController.OrderDetails);

@@ -104,18 +104,24 @@
                                             <li><i class="fi-rs-credit-card mr-5"></i> Cash on Delivery available</li>
                                         </ul>
                                     </div>
+                                    <% if(product.category!== 'cameras') { %>
                                     <div class="attr-detail attr-color mb-15">
                                         <strong class="mr-10">Color</strong>
                                         <ul class="list-filter color-filter">
+
                                             <li><a href="#" data-color="Red"><span class="product-color-red"></span></a></li>
                                             <!-- <li><a href="#" data-color="Yellow"><span class="product-color-yellow"></span></a></li> -->
-                                            <li class="active"><a href="#" data-color="White"><span class="product-color-white"></span></a></li>
+                                            <li ><a href="#" data-color="White"><span class="product-color-white"></span></a></li>
                                             <li><a href="#" data-color="Orange"><span class="product-color-orange"></span></a></li>
                                             <li><a href="#" data-color="Cyan"><span class="product-color-cyan"></span></a></li>
                                             <li><a href="#" data-color="Green"><span class="product-color-green"></span></a></li>
                                             <li><a href="#" data-color="Purple"><span class="product-color-purple"></span></a></li>
                                         </ul>
                                     </div>
+                                    <% } %>
+
+
+                                    <% if(product.category === 'smartphone') { %>
                                     <div class="attr-detail attr-size">
                                         <strong class="mr-10">Size</strong>
                                         <ul class="list-filter size-filter font-small">
@@ -126,13 +132,27 @@
                                             <!-- <li><a href="#">XXL</a></li> -->
                                         </ul>
                                     </div>
+                                    <% }else if (product.category === 'Laptops') { %>
+                                        <div class="attr-detail attr-size">
+                                            <strong class="mr-10">Size</strong>
+                                            <ul class="list-filter size-filter font-small">
+                                                <li><a href="#">128 GB</a></li>
+                                                <li class="active"><a href="#">256 GB</a></li>
+                                                <li><a href="#">512 GB</a></li>
+                                                <li><a href="#">1 TB</a></li>
+                                                <!-- <li><a href="#">XXL</a></li> -->
+                                            </ul>
+                                        </div>
+                                        <% } %>
+
                                     <div class="bt-1 border-color-1 mt-30 mb-30"></div>
                                     <div class="detail-extralink">
                                         <div class="detail-qty border radius">
-                                            <a href="#" class="qty-down"><i class="fi-rs-angle-small-down"></i></a>
+                                            <a  class="qty-down"><i class="fi-rs-angle-small-down"></i></a>
                                             <span class="qty-val">1</span>
-                                            <a href="#" class="qty-up"><i class="fi-rs-angle-small-up"></i></a>
+                                            <a  class="qty-up"><i class="fi-rs-angle-small-up"></i></a>
                                         </div>
+                                        
                                         <div class="product-extra-link2">
 
                                             <% if (product.totalQty) { %>
@@ -145,7 +165,7 @@
 
                                                 <% } %>
 
-                                                                                        
+                                                         
                                             <% if (wishlist && wishlist.products.includes(product._id)) { %>
                                                 <!-- Render this button if the product is already in the wishlist -->
                                                 <a aria-label="Add To Wishlist" id="wishlistButton_<%= product._id %>" style="background-color: #088178; border: 1px solid transparent;color: white;" onclick="addToWishlist('<%=product._id%>')" ><i class="fi-rs-heart"></i></a>
@@ -157,7 +177,12 @@
 
 
                                             <a aria-label="Compare" class="action-btn hover-up" href="shop-compare.html"><i class="fi-rs-shuffle"></i></a>
+                                            
                                         </div>
+                                        <br>
+                                        <% if(product.totalQty < 8  && product.totalQty ) { %>
+                                            <span>Only <%=product.totalQty%> left</span>
+                                            <% } %>
                                     </div>
                                     <!-- <ul class="product-meta font-xs color-grey mt-50">
                                         <li class="mb-5">SKU: <a href="#">FWM15VKT</a></li>
@@ -723,3 +748,52 @@
       window.location.href = `/user-add-to-cart?productId=<%=product._id%>&quantity=${quantityValue}`;
     }
   </script>
+
+  
+ <script>
+    const qtyDownButton = document.querySelector('.qty-down');
+    const qtyUpButton = document.querySelector('.qty-up');
+    const qtyValue = document.querySelector('.qty-val');
+    const totalQty = parseInt('<%= product.totalQty %>');
+  
+    let quantity = parseInt(qtyValue.textContent);
+  
+    qtyUpButton.addEventListener('click', () => {
+
+        if (quantity < totalQty) {
+      quantity++;
+
+      if (quantity === totalQty) {
+        qtyUpButton.style.pointerEvents = 'none';
+      qtyUpButton.style.opacity = '0.5'; 
+         }
+
+      if (quantity > 1) {
+        qtyDownButton.style=''
+      }
+    }
+    if(quantity===10){
+        qtyUpButton.style.pointerEvents = 'none';
+      qtyUpButton.style.opacity = '0.5'; 
+        Toastify({
+          text: `We're sorry! Only 10 unit(s) allowed in each order`,
+          duration: 3000,
+          backgroundColor: "#FF9999",
+          gravity: "bottom", // Display the toast at the top of the screen
+          position: "center", // Center the toast horizontally
+          stopOnFocus: true,
+        }).showToast();
+    }
+  });
+
+  qtyDownButton.addEventListener('click', () => {
+    if (quantity > 1) {
+      quantity--;
+      qtyUpButton.style=''
+    }
+
+    if (quantity === 1) {
+        qtyDownButton.style.pointerEvents = 'none';
+      qtyDownButton.style.opacity = '0.5';    }
+    });
+  </script> 

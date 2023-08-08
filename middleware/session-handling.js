@@ -2,7 +2,6 @@
 module.exports={
     checkingUser:(req,res,next)=>{
         if(req.session.user_id){
-            console.log('hshgcfc')
             next()
         }else{
 

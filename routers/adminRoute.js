@@ -22,6 +22,7 @@ adminRoute.use(express.static('public'));
 
 //Admin_DashBoard
 adminRoute.get("/",sessionHandling.checkingAdmin,adminController.dashBoard);
+adminRoute.get('/create-report',sessionHandling.checkingAdmin,adminController.getReport)
 //Admin_login & Logout
 adminRoute.get("/login",sessionHandling.adminAuthenticationcheck,adminController.loginLoad);
 adminRoute.post("/login",adminController.verifyLogin);
@@ -48,6 +49,8 @@ adminRoute.post("/add-product",upload,productController.postAddProduct);
 adminRoute.get("/orders",sessionHandling.checkingAdmin,upload,adminController.getUserOrders);
 adminRoute.get('/user-orderDetails/:id',sessionHandling.checkingAdmin,adminController.userOrderDetails)
 adminRoute.post('/change-status',sessionHandling.checkingAdmin,adminController.changeOrderStatus)
+//Date_Wise_Report
+adminRoute.post('/date-wise-report',adminController.dateWiseReport)
 
 
 

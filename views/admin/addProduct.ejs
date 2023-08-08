@@ -136,8 +136,10 @@
             document.getElementById('imgView').src = URL.createObjectURL(event.target.files[0]);
         }
     </script> -->
-    
 
+   
+
+ 
 
     <main class="main-wrap">
         <section class="content-main">
@@ -177,6 +179,8 @@
                             <option value="256 GB">256 GB</option>
                             <option value="512 GB">512 GB</option>
                             <option value="1 TB">1 TB</option>
+
+                        
                           </select>
                         </div>
                       </div>
@@ -212,16 +216,82 @@
                         <% } %>
                         </select>
                       </div>
-                      <div class="mb-3">
+                      <!-- <div class="mb-3">
                         <label class="form-label">Media</label>
-                        <div class="input-upload">
+                        <div class="input-upload"> -->
                           <!-- Image previews will be shown here -->
-                          <div id="image-previews"></div>
-                      
-                          <input class="form-control" type="file" name="images" onchange="viewImages(event)" required="" multiple>
+                          <!-- <div id="image-preview"></div>
+                          <button id="crop-button" style="display: none;">crop</button>
+                          <input id="fileInput" class="form-control" type="file" name="images" onchange="initImageCropper(event)" required multiple>
                         </div>
+                      </div> -->
+
+
+
+
+                      <div class="col-lg-6">
+                        <div class="card mb-4">
+                          <div class="card-header">
+                            <h4>Media</h4>
+                          </div>
+                          <div class="input-upload">
+                            <img src="/imgs/theme/upload.svg" id="imgView1" alt="">
+                            <input class="form-control" id="input1" name="images" onchange="viewImage1(event),viewImage(event, 1)" type="file">
+                          </div>
+                          <div class="image-cropper" style="display:none;">
+                            <img src="" id="croppedImg1" alt="">
+                            <button type="button" id="saveButton1" class="btn-sm btn-primary">Save</button>
+                          </div>
+              
+                        </div> <!-- card end// -->
                       </div>
-      
+                      <div class="col-lg-6">
+                        <div class="card mb-4">
+                          <div class="card-header">
+                            <h4>Media</h4>
+                          </div>
+                          <div class="input-upload">
+                            <img src="/imgs/theme/upload.svg" id="imgView2" alt="">
+                            <input class="form-control" id="input2" name="images" onchange="viewImage2(event),viewImage(event, 2)" type="file">
+                          </div>
+                          <div class="image-cropper" style="display:none;">
+                            <img src="" id="croppedImg2" alt="">
+                            <button type="button" id="saveButton2" class="btn-sm btn-primary">Save</button>
+                          </div>
+              
+                        </div> <!-- card end// -->
+                      </div>
+                      <div class="col-lg-6">
+                        <div class="card mb-4">
+                          <div class="card-header">
+                            <h4>Media</h4>
+                          </div>
+                          <div class="input-upload">
+                            <img src="/imgs/theme/upload.svg" id="imgView3" alt="">
+                            <input class="form-control" id="input3" name="images" onchange="viewImage3(event),viewImage(event, 3)" type="file">
+                          </div>
+                          <div class="image-cropper" style="display:none;">
+                            <img src="" id="croppedImg3" alt="">
+                            <button type="button" id="saveButton3" class="btn-sm btn-primary">Save</button>
+                          </div>
+                      </div>
+                    </div>
+                    <div class="col-lg-6">
+                      <div class="card mb-4">
+                        <div class="card-header">
+                          <h4>Media</h4>
+                        </div>
+                        <div class="input-upload">
+                          <img src="/imgs/theme/upload.svg" id="imgView4" alt="">
+                          <input class="form-control" id="input4" name="images" onchange="viewImage4(event),viewImage(event, 4)" type="file">
+                        </div>
+                        <div class="image-cropper" style="display:none;">
+                          <img src="" id="croppedImg4" alt="">
+                          <button type="button" id="saveButton4" class="btn-sm btn-primary">Save</button>
+                        </div>
+            
+                      </div>
+                  </div>
                       <button type="submit" class="btn btn-primary bg-success">Submit</button>
                     </form>
                   </div>
@@ -230,23 +300,150 @@
             </div>
           </div>
         </section>
+
+
+
+
       
-        <script>
-            // ... Your existing script code ...
-          
-            function viewImages(event) {
-              const imagePreviewsContainer = document.getElementById('image-previews');
-              imagePreviewsContainer.innerHTML = ''; // Clear previous previews
-          
-              const files = event.target.files;
-              for (let i = 0; i < files.length; i++) {
-                const img = document.createElement('img');
-                img.src = URL.createObjectURL(files[i]);
-                img.className = 'img-thumbnail';
-                img.style.width = '100px'; // Set a fixed width for image previews (adjust as needed)
-                imagePreviewsContainer.appendChild(img);
-              }
-            }
-          </script>
+
+        
+<!--     
+ <script>
+         function viewImages(event) {
+  const imagePreviewsContainer = document.getElementById('image-previews');
+  
+  const files = event.target.files;
+  for (let i = 0; i < files.length; i++) {
+    const imgContainer = document.createElement('div'); // Create a container for each image
+    imgContainer.className = 'img-container';
+    imgContainer.style.display='inline-block'
+    imgContainer.style.marginRight='10px'
+    
+    const img = document.createElement('img');
+    img.src = URL.createObjectURL(files[i]);
+    img.className = 'img-thumbnail';
+    img.style.width = '100px'; // Set a fixed width for image previews (adjust as needed)
+    
+    imgContainer.appendChild(img);
+    imagePreviewsContainer.appendChild(imgContainer);
+  }
+}
+
+ </script> -->
+
+
+
+ <!-- <script>
+ function initCropper(event) {
+   const input = event.target;
+   const previewsContainer = document.getElementById('image-previews');
+ 
+   // Clear previous previews
+   previewsContainer.innerHTML = '';
+ 
+   // Loop through selected files and create previews
+   for (const file of input.files) {
+     const preview = document.createElement('div');
+     preview.classList.add('image-preview');
+ 
+     const image = new Image();
+     image.src = URL.createObjectURL(file);
+     preview.appendChild(image);
+ 
+     previewsContainer.appendChild(preview); // Append the preview container
+ 
+     // Initialize Cropper.js
+     const cropper = new Cropper(image, {
+       aspectRatio: 16 / 9, // Set your desired aspect ratio here
+       viewMode: 0, // You can adjust this according to your needs
+       ready() {
+         // This function is called when the cropper is ready
+       },
+       crop(event) {
+         // This function is called when the cropping area changes
+       }
+     });
+   }
+ }
+ </script> -->
+ 
+
+
+  <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js"></script> -->
+
+  <script>
+
+  function viewImage1(event) {
+    document.getElementById('imgView1').src = URL.createObjectURL(event.target.files[0])
+  }
+  
+  function viewImage2(event) {
+    document.getElementById('imgView2').src = URL.createObjectURL(event.target.files[0])
+  }
+  
+  function viewImage3(event) {
+    document.getElementById('imgView3').src = URL.createObjectURL(event.target.files[0])
+  }
+  function viewImage4(event) {
+    document.getElementById('imgView4').src = URL.createObjectURL(event.target.files[0])
+  }
+    </script>
+    <script>
+    function viewImage(event, index) {
+        let input = event.target;
+        let reader = new FileReader();
+    
+        reader.onload = function() {
+          let dataURL = reader.result;
+          let image = document.getElementById('imgView' + index);
+          image.src = dataURL;
+    
+          // Initialize Cropper.js on the image
+          let cropper = new Cropper(image, {  
+            aspectRatio: 1 / 1, // Set the aspect ratio to 1:1 for square images
+            viewMode: 1, // Set the view mode to crop box
+            guides: true, // Show the crop guides
+            background: false, // Do not show the background behind the image
+            autoCropArea: 1, // Set the initial crop area to cover the whole image
+            zoomable: true // Disable zooming to keep the image size fixed
+          });
+    
+          // Show the image cropper container
+          let cropperContainer = document.querySelector('#croppedImg' + index).parentNode;
+          cropperContainer.style.display = 'block';
+    
+          // Update the cropped image when the "Save" button is clicked
+          let saveButton = document.querySelector('#saveButton' + index);
+          saveButton.addEventListener('click', async function() {
+            let croppedCanvas = cropper.getCroppedCanvas({
+              width: 471, 
+              height: 550 
+            });
+            let croppedImage = document.getElementById("croppedImg" + index);
+            croppedImage.src = croppedCanvas.toDataURL('image/jpeg', 1.0);
+    
+            // Generate a unique name for the cropped image file based on the current timestamp
+            let timestamp = new Date().getTime();
+            let fileName = `cropped-img-${timestamp}-${index}.png`;
+    
+            await croppedCanvas.toBlob(blob => {
+              let input = document.getElementById('input' + index)
+              let imgFile = new File([blob], fileName, blob)
+              const fileList = new DataTransfer();
+              fileList.items.add(imgFile);
+              input.files = fileList.files
+            });
+            // cropperContainer.style.display = 'none';
+          });
+    
+        };
+    
+        reader.readAsDataURL(input.files[0]);
+      }
+</script>
+
+
+
+  
           
       

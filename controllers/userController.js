@@ -11,6 +11,7 @@ const { query } = require("express");
 const { ObjectId } = require("mongodb");
 const { json } = require("body-parser");
 
+
 const getHome = async (req, res) => {
   try {
     const categories = await Category.find({});
@@ -311,6 +312,39 @@ const userLogout = async (req, res) => {
 // };
 
 
+//Search_Products
+const productSearch=async (req,res)=>{
+  try {
+
+  
+      const search=req.query.search
+    
+    const data= await Products.find({
+      isActive:true,
+        $or: [
+            {name:{$regex:'.*'+search+'.*',$options:'i'}},
+            {category:{$regex:'.*'+search+'.*',$options:'i'}},
+            {subCategory:{$regex:'.*'+search+'.*',$options:'i'}}
+        ]
+    });
+    if (!data.length){
+      res.render('no-products-found')
+    }else{
+      const uniqueCategoryNames = [...new Set(data.map(item => item.category))];
+
+      // Query categories based on the unique category names
+      const categoryList = await Category.find({ name: { $in: uniqueCategoryNames } });
+  
+      res.render("products", { data,categoryList });
+    }
+
+    
+  } catch (error) {
+    console.log(error.message)
+  }
+}
+
+//Get_Products
 const getProducts = async (req, res) => {
   try {
     console.log('BODY :::',req.body)
@@ -400,8 +434,10 @@ const getProducts = async (req, res) => {
 
 const viewProduct = async (req, res) => {
   try {
-    const { id } = req.query;
+    console.log('rqueryyyyy',req.query)
+    let {id} = req.query;
     const product = await Products.findById({ _id: id });
+    console.log("PRODUCTTTTTTTTT:",product)
     const wishlist= await Wishlist.findOne({userId:new ObjectId(req.session.user_id)});
     console.log('wishlist::::', wishlist)
     res.render("productDetails", { product, wishlist });
@@ -675,6 +711,7 @@ module.exports = {
   forgotVerify,
   forgotOTPVerification,
   verifyPassword,
+  productSearch,
   getProducts,
   userLogout,
   viewProduct,
@@ -685,5 +722,6 @@ module.exports = {
   returnOrder,
   getWishlist,
   addToWishlist,
-  deleteWishlist
+  deleteWishlist,
+  
 };

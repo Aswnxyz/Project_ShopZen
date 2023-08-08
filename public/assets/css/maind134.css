@@ -4512,6 +4512,9 @@ table .product-thumbnail img {
 .product-color-white {
   background: #ffffff;
 }
+.product-color-black {
+  background: #000000;
+}
 
 .product-color-orange {
   background: #ffbb51;

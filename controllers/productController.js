@@ -96,10 +96,8 @@ await Product.updateOne(
     postAddProduct:async (req,res)=>{
         try {
             const images = req.files.map(file => path.basename(file.path));
-            
             console.log(req.body);
-            const softDeleted= await Product.findOne({name:req.body.name});
-            console.log('produvyjkgjdfsgjkdfngvndfjkgnfdklgfdngfkg',softDeleted)
+            const softDeleted= await Product.findOne({name:req.body.name,isActive:false});
             if(softDeleted){
                 await Product.updateOne(
                     {name:req.body.name},
@@ -120,7 +118,7 @@ await Product.updateOne(
                 await product.save();
             }
 
-           
+            
             res.redirect('/admin/add-product?addProductSuccess=Product%20added%20successfully!')
         } catch (error) {
             console.log(error.message)

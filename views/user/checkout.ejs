@@ -1,155 +1,221 @@
 <main class="main">
-    <div class="page-header breadcrumb-wrap">
-        <div class="container">
-            <div class="breadcrumb">
-                <a href="/" rel="nofollow">Home</a>
-                <span></span> Shop
-                <span></span> Checkout
-            </div>
-        </div>
+  <div class="page-header breadcrumb-wrap">
+    <div class="container">
+      <div class="breadcrumb">
+        <a href="/" rel="nofollow">Home</a>
+        <span></span> Shop <span></span> Checkout
+      </div>
     </div>
-    <section class="mt-50 mb-50">
-        <div class="container">
+  </div>
+  <section class="mt-50 mb-50">
+    <div class="container">
+      <div class="row">
+        <h3>Checkout</h3>
+        <div class="col-12">
+          <div class="divider mt-50 mb-50"></div>
+        </div>
+      </div>
 
-            <div class="row">
-                <h3>Checkout</h3>
-                <div class="col-12">
-                    <div class="divider mt-50 mb-50"></div>
+      <!-- modal for adding new address -->
+      <div
+        class="modal fade"
+        id="exampleModal"
+        tabindex="-1"
+        aria-labelledby="exampleModalLabel"
+        aria-hidden="true"
+      >
+        <div class="modal-dialog">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title" id="exampleModalLabel">New address</h5>
+              <button
+                type="button"
+                class="btn-close"
+                data-bs-dismiss="modal"
+                aria-label="Close"
+              ></button>
+            </div>
+            <div>
+              <form action="/add-address?checkout=true" method="post">
+                <div class="form-group">
+                  <input
+                    type="text"
+                    required
+                    name="name"
+                    placeholder="Name *"
+                    id="user-name"
+                  />
                 </div>
+                <div class="form-group">
+                  <input
+                    required
+                    type="tel"
+                    name="mobile"
+                    placeholder="Mobile *"
+                    id="user-phone"
+                  />
+                </div>
+                <div class="form-group">
+                  <input
+                    required
+                    type="number"
+                    name="pincode"
+                    placeholder="Postcode *"
+                    id="user-pin-code"
+                  />
+                </div>
+                <div class="form-group">
+                  <input
+                    type="text"
+                    name="area"
+                    required
+                    placeholder="Address *"
+                  />
+                </div>
+                <div class="form-group">
+                  <input
+                    required
+                    type="text"
+                    name="locality"
+                    placeholder="Locality *"
+                  />
+                </div>
+                <div class="form-group">
+                  <input
+                    required
+                    type="text"
+                    name="district"
+                    placeholder="District *"
+                  />
+                  <input type="text" name="newAddress" hidden value="true" />
+                </div>
+                <div class="form-group">
+                  <div class="custom_select">
+                    <select
+                      class="form-control select-active"
+                      name="state"
+                      style="width: 140px"
+                    >
+                      <option>Kerala</option>
+                      <option>Tamil Nadu</option>
+                      <option>Andrapradesh</option>
+                    </select>
+                  </div>
+                </div>
+                <div class="modal-footer">
+                  <button
+                    type="button"
+                    class="btn btn-secondary"
+                    data-bs-dismiss="modal"
+                  >
+                    Close
+                  </button>
+                  <button type="submit" class="btn btn-primary">Save</button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- address and payment method selection to chechout  -->
+      <form id="checkout-form" action="/place-order" method="post">
+        <div class="row">
+          <div class="col-md-6">
+            <input type="text" hidden name="userId" value="" />
+            <div class="mb-25">
+              <h4>Select Address</h4>
+            </div>
+            <div class="payment_option">
+              <% for(let i =0 ; i< address.length ; i++) { %>
+              <div class="order_review">
+                <div class="form-check">
+                  <input
+                    class="form-check-input"
+                    checked
+                    type="radio"
+                    name="deliveryAddress"
+                    id="flexRadioDefault1"
+                    value="<%=address[i]._id%>"
+                    required
+                  />
+                  <label class="form-check-label" for="flexRadioDefault1">
+                    <ul>
+                      <li>Name: <%=address[i].name%></li>
+                      <li>Mobile: <%=address[i].mobile%></li>
+                      <li>Pincode: <%=address[i].pincode%></li>
+                      <li>
+                        Address: <%=address[i].locality%>, <%=address[i].area%>,
+                        <%=address[i].district%>, <%=address[i].state%>
+                      </li>
+                      <br />
+                    </ul>
+                  </label>
+                </div>
+              </div>
+              <br />
+              <% } %>
             </div>
 
-             <!-- modal for adding new address -->
-            <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel"
-                aria-hidden="true">
-                <div class="modal-dialog">
-                    <div class="modal-content">
-                        <div class="modal-header">
-                            <h5 class="modal-title" id="exampleModalLabel">New address</h5>
-                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                        </div>
-                        <div>
-                            <form action="/add-address?checkout=true" method="post">
-                                <div class="form-group">
-                                    <input type="text" required name="name" placeholder="Name *" id="user-name">
+            <button
+              type="button"
+              class="btn btn-primary"
+              data-bs-toggle="modal"
+              data-bs-target="#exampleModal"
+              data-bs-whatever="@mdo"
+            >
+              Add new address
+            </button>
+          </div>
 
-                                </div>
-                                <div class="form-group">
-                                    <input required type="tel" name="mobile" placeholder="Mobile *" id="user-phone">
+          <div class="col-md-6">
+            <div class="order_review">
+              <div class="mb-20">
+                <h4>Your Orders</h4>
+              </div>
+              <div class="table-responsive order_table text-center">
+                <table class="table">
+                  <thead>
+                    <tr>
+                      <th colspan="2">Product</th>
+                      <th>Total</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <% for (let i = 0 ; i < products.length ; i++) { %>
+                    <tr>
+                      <td class="image product-thumbnail">
+                        <img
+                          src="productImages/<%=products[i].item.images[3]%>"
+                          alt="#"
+                        />
+                      </td>
+                      <td>
+                        <h5><a href="#"><%=products[i].item.name%></a></h5>
+                        <span class="product-qty"
+                          >x <%=products[i].quantity%></span
+                        >
+                      </td>
+                      <!-- <td>₹{{prices product.price product.discountedPrice}}</td> -->
+                    </tr>
+                    <% } %>
 
-                                </div>
-                                <div class="form-group">
-                                    <input required type="number" name="pincode" placeholder="Postcode *"
-                                        id="user-pin-code">
-
-                                </div>
-                                <div class="form-group">
-                                    <input type="text" name="area" required placeholder="Address *">
-                                </div>
-                                <div class="form-group">
-                                    <input required type="text" name="locality" placeholder="Locality *">
-                                </div>
-                                <div class="form-group">
-                                    <input required type="text" name="district" placeholder="District *">
-                                    <input type="text" name="newAddress" hidden value="true">
-                                </div>
-                                <div class="form-group">
-                                    <div class="custom_select">
-                                        <select class="form-control select-active" name="state" style="width: 140px;">
-                                            <option>Kerala</option>
-                                            <option>Tamil Nadu</option>
-                                            <option>Andrapradesh</option>
-                                        </select>
-                                    </div>
-                                </div>
-                                <div class="modal-footer">
-                                    <button type="button" class="btn btn-secondary"
-                                        data-bs-dismiss="modal">Close</button>
-                                    <button type="submit" class="btn btn-primary">Save</button>
-                                </div>
-                            </form>
-                        </div>
-
-                    </div>
-                </div>
-            </div>
-
-             <!-- address and payment method selection to chechout  -->
-            <form id="checkout-form" action="/place-order" method="post">
-
-                <div class="row">
-                    <div class="col-md-6">
-                        <input type="text" hidden name="userId" value="">
-                        <div class="mb-25">
-                            <h4>Select Address</h4>
-                        </div>
-                        <div class="payment_option">
-                            <% for(let i =0 ; i< address.length ; i++) { %>
-                            <div class="order_review">
-                                <div class="form-check">
-                                    <input class="form-check-input" checked type="radio" name="deliveryAddress"
-                                        id="flexRadioDefault1" value="<%=address[i]._id%>" required>
-                                    <label class="form-check-label" for="flexRadioDefault1">
-                                        <ul>
-                                            <li>Name: <%=address[i].name%></li>
-                                            <li>Mobile: <%=address[i].mobile%></li>
-                                            <li>Pincode: <%=address[i].pincode%></li>
-                                            <li>Address: <%=address[i].locality%>, <%=address[i].area%>, <%=address[i].district%>, <%=address[i].state%></li>
-                                            <br>
-                                        </ul>
-                                    </label>
-                                </div>
-
-                            </div>
-                            <br>
-                            <% } %>
-                        </div>
-
-
-                        <button type="button" class="btn btn-primary" data-bs-toggle="modal"
-                            data-bs-target="#exampleModal" data-bs-whatever="@mdo">Add new address</button>
-
-                    </div>
-
-                    <div class="col-md-6">
-                        <div class="order_review">
-                            <div class="mb-20">
-                                <h4>Your Orders</h4>
-                            </div>
-                            <div class="table-responsive order_table text-center">
-                                <table class="table">
-                                    <thead>
-                                        <tr>
-                                            <th colspan="2">Product</th>
-                                            <th>Total</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        <% for (let i = 0 ; i < products.length ; i++) { %>
-                                        <tr>
-                                            <td class="image product-thumbnail"><img src="productImages/<%=products[i].item.images[3]%>"
-                                                    alt="#"></td>
-                                            <td>
-                                                <h5><a href="#"><%=products[i].item.name%></a></h5>
-                                                <span class="product-qty">x <%=products[i].quantity%></span>
-                                            </td>
-                                            <!-- <td>₹{{prices product.price product.discountedPrice}}</td> -->
-                                        </tr>
-                                        <% } %>
-
-                                        <tr>
-                                            <th>SubTotal</th>
-                                            <td class="product-subtotal" colspan="2">&#8377; <%=cartTotal%></td>
-                                        </tr>
-                                        <tr>
-                                            <th>Shipping</th>
-                                            <td colspan="2"><em>Free</em></td>
-                                        </tr>
-                                        <!-- {{#if discountPrice}} -->
-                                        <!-- <tr>
+                    <tr>
+                      <th>SubTotal</th>
+                      <td class="product-subtotal" colspan="2">
+                        &#8377; <%=cartTotal%>
+                      </td>
+                    </tr>
+                    <tr>
+                      <th>Shipping</th>
+                      <td colspan="2"><em>Free</em></td>
+                    </tr>
+                    <!-- {{#if discountPrice}} -->
+                    <!-- <tr>
                                             <th>Discount</th>
                                             <td colspan="2"><em>{{formatCurrency discountPrice}}</em></td>
                                         </tr> -->
-                                        <!-- {{/if}}
+                    <!-- {{/if}}
                                         {{#if afterDiscount}}
                                         <tr>
                                             <th>Total</th>
@@ -159,176 +225,239 @@
                                             </td>
                                         </tr>
                                         {{else}} -->
-                                        <tr>
-                                            <th>Total</th>
-                                            <td colspan="2" class="product-subtotal"><span
-                                                    class="font-xl text-brand fw-900">&#8377; <%=cartTotal%></span>
-                                            </td>
-                                        </tr>
-                                        <!-- {{/if}} -->
-                                    </tbody>
-                                </table>
-                            </div>
+                    <tr>
+                      <th>Total</th>
+                      <td colspan="2" class="product-subtotal">
+                        <span class="font-xl text-brand fw-900"
+                          >&#8377; <%=cartTotal%></span
+                        >
+                      </td>
+                    </tr>
+                    <!-- {{/if}} -->
+                  </tbody>
+                </table>
+              </div>
 
-
-                            <div class="payment_method">
-                                <div class="mb-25">
-                                    <h5>Payment</h5>
-                                </div>
-                                <div class="payment_option">
-                                    <div class="custome-radio">
-                                        <input class="form-check-input" required="" type="radio" name="payment_option"
-                                            id="exampleRadios3" checked="" value="COD">
-                                        <label class="form-check-label" for="exampleRadios3" data-bs-toggle="collapse"
-                                            data-target="#" aria-controls="bankTranfer">COD</label>
-                                    </div>
-                                    <div class="custome-radio">
-                                        <input class="form-check-input" required="" type="radio" name="payment_option"
-                                            id="exampleRadios4" value="Razorpay">
-                                        <label class="form-check-label" for="exampleRadios4" data-bs-toggle="collapse"
-                                            data-target="#" aria-controls="checkPayment">RazorPay</label>
-                                    </div>
-                                    <div class="custome-radio">
-                                        <input class="form-check-input" required="" type="radio" name="payment_option"
-                                            id="exampleRadios5" value="Wallet">
-                                        <label class="form-check-label" for="exampleRadios5" data-bs-toggle="collapse"
-                                            data-target="#" aria-controls="checkPayment">Wallet</label>
-                                    </div>
-                                     <div class="custome-radio">
-                                        <input class="form-check-input" required="" type="radio" name="payment_option"
-                                            id="exampleRadios5" checked="" value="Paypal">
-                                        <label class="form-check-label" for="exampleRadios5" data-bs-toggle="collapse"
-                                            data-target="#" aria-controls="paypal">Paypal</label>
-                                    </div> 
-                                </div>
-                            </div>
-                            <button  class="btn btn-fill-out btn-block mt-30" type="submit" onclick="placeOrder()"  >Place Order</button>
-                        </div>
-                    </div>
+              <div class="payment_method">
+                <div class="mb-25">
+                  <h5>Payment</h5>
                 </div>
-            </form>
+                <div class="payment_option">
+                  <div class="custome-radio">
+                    <input
+                      class="form-check-input"
+                      required=""
+                      type="radio"
+                      name="payment_option"
+                      id="exampleRadios3"
+                      checked=""
+                      value="COD"
+                    />
+                    <label
+                      class="form-check-label"
+                      for="exampleRadios3"
+                      data-bs-toggle="collapse"
+                      data-target="#"
+                      aria-controls="bankTranfer"
+                      >COD</label
+                    >
+                  </div>
+                  <div class="custome-radio">
+                    <input
+                      class="form-check-input"
+                      required=""
+                      type="radio"
+                      name="payment_option"
+                      id="exampleRadios4"
+                      value="Razorpay"
+                    />
+                    <label
+                      class="form-check-label"
+                      for="exampleRadios4"
+                      data-bs-toggle="collapse"
+                      data-target="#"
+                      aria-controls="checkPayment"
+                      >RazorPay</label
+                    >
+                  </div>
+                  <div class="custome-radio">
+                    <input
+                      class="form-check-input"
+                      required=""
+                      type="radio"
+                      name="payment_option"
+                      id="exampleRadios5"
+                      value="Wallet"
+                    />
+                    <label
+                      class="form-check-label"
+                      for="exampleRadios5"
+                      data-bs-toggle="collapse"
+                      data-target="#"
+                      aria-controls="checkPayment"
+                      >Wallet</label
+                    >
+                  </div>
+                  <div class="custome-radio">
+                    <input
+                      class="form-check-input"
+                      required=""
+                      type="radio"
+                      name="payment_option"
+                      id="exampleRadios5"
+                      checked=""
+                      value="Paypal"
+                    />
+                    <label
+                      class="form-check-label"
+                      for="exampleRadios5"
+                      data-bs-toggle="collapse"
+                      data-target="#"
+                      aria-controls="paypal"
+                      >Paypal</label
+                    >
+                  </div>
+                </div>
+              </div>
+              <button class="btn btn-fill-out btn-block mt-30" type="submit">
+                Place Order
+              </button>
+            </div>
+          </div>
         </div>
-    </section>
+      </form>
+    </div>
+  </section>
 </main>
 
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.0.19/dist/sweetalert2.all.min.js"></script>
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
-
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
 
 <script>
-  function  placeOrder(){
-    
-  // Show a thank-you message using SweetAlert
-  Swal.fire({
-    title: 'Thank You!',
-    text: 'Your order has been placed successfully.',
-    icon: 'success',
-    confirmButtonText: 'OK'
-  }).then((result) => {
-    if (result.isConfirmed) {
-      // Load a new page or redirect to a different URL after the user clicks "OK"
-      window.location.href = '/landing-page'; // Replace with your desired URL
-    }
-  });
-  }
-</script>
+  $(document).ready(function () {
+    $("#checkout-form").submit(function (event) {
+      event.preventDefault(); // Prevent the default form submission
 
+      // Serialize the form data
+      var formData = $(this).serialize();
 
-
-
-<!-- 
-<script>
-    $("#checkout-form").submit((e) => {
-        e.preventDefault();
-        let form_data = $('#checkout-form').serialize();
-        // Add confirmation dialogs for all payment methods
-        swal({
-            title: "Are you sure?",
-            text: "You are about to place an order. Continue?",
-            icon: "warning",
-            buttons: true,
-            dangerMode: true,
-        })
-            .then((confirm) => {
-                if (confirm) {
-                    let payment_method = $('input[name=payment_option]:checked').val();
-                    console.log(payment_method)
-                    // Wallet payment method requires wallet details confirmation
-            
-                        placeOrder();
-                    
-                }
-            });
-
-        function placeOrder() {
-            // Send AJAX request to place order
-            $.ajax({
-                method: 'POST',
-                url: ('/place-order'),
-                data: form_data,
-                success: (response) => {
-                    switch (response.status) {
-                        case 'cod':
-                            swal(
-                                "Successful!",
-                                "Order Placed Successfully!",
-                                "success"
-                            )
-                                .then(() => {
-                                    location.replace('/landing-page');
-                                });
-                       
-                    }
-                },
-                error: (response, stat, err) => {
-                    console.log(response);
-                }
-            });
-        }
-    });
-</script> -->
-
-
-<!-- 
-<script>
-    document.getElementById("checkout-form").addEventListener("submit", function (e) {
-        e.preventDefault();
-        let form_data = new FormData(document.getElementById("checkout-form"));
-        console.log(form_data);
-
-        // Add confirmation dialogs for all payment methods
-        if (confirm("Are you sure? You are about to place an order. Continue?")) {
-            let payment_method = document.querySelector('input[name=payment_option]:checked').value;
-            console.log(payment_method);
-            // Wallet payment method requires wallet details confirmation
-            placeOrder(form_data);
-        }
-    });
-
-    function placeOrder(form_data) {
-        // Send AJAX request to place order
-        var xhr = new XMLHttpRequest();
-        xhr.open("POST", "/place-order", true);
-        xhr.onload = function () {
-            if (xhr.status >= 200 && xhr.status < 300) {
-                var response = JSON.parse(xhr.responseText);
-                switch (response.status) {
-                    case "cod":
-                        alert("Successful! Order Placed Successfully!");
-                        location.replace("/landing-page");
-                        break;
-                    // Add cases for other response statuses as needed
-                }
-            } else {
-                console.error("Request failed with status:", xhr.status);
+      // Perform the AJAX request
+      $.ajax({
+        url: $(this).attr("action"),
+        type: $(this).attr("method"),
+        data: formData,
+        success: function (response) {
+          // Handle the success response from the server
+          switch(response.paymentOption){
+            case 'COD':
+            Swal.fire({
+            title: "Thank You!",
+            text: "Your order has been placed successfully.",
+            icon: "success",
+            confirmButtonText: "OK",
+          }).then((result) => {
+            if (result.isConfirmed) {
+              // Load a new page or redirect to a different URL after the user clicks "OK"
+              window.location.href = "/landing-page"; // Replace with your desired URL
             }
-        };
-        xhr.onerror = function () {
-            console.error("Request failed.");
-        };
-        xhr.send(form_data);
-    }
-</script> -->
+          });
+          break;
+          case 'Razorpay':
+          
+          razorpayPayment(response.order)
 
-  
+
+          break;
+
+          }
+
+         
+          // You can update the UI or redirect the user here
+        },
+        error: function (xhr, status, error) {
+          // Handle errors
+          console.error("Error placing order: " + error);
+          // Display an error message to the user
+        },
+      });
+    });
+  });
+
+  function razorpayPayment(order){
+    var options = {
+    "key": "rzp_test_SfiHz94Pmnimk2", // Enter the Key ID generated from the Dashboard
+    "amount": order.amount, // Amount is in currency subunits. Default currency is INR. Hence, 50000 refers to 50000 paise
+    "currency": "INR",
+    "name": "ShopZen",
+    "description": "Test Transaction",
+    "image": "/assets/imgs/theme/ShopZen.png",
+    "order_id": order.id, //This is a sample Order ID. Pass the `id` obtained in the response of Step 1
+    "handler": function (response){
+        // alert(response.razorpay_payment_id);
+        // alert(response.razorpay_order_id);
+        // alert(response.razorpay_signature);
+        verifyPayment(response,order)
+    },
+    "prefill": {
+        "name": "Gaurav Kumar",
+        "email": "gaurav.kumar@example.com",
+        "contact": "9000090000"
+    },
+    "notes": {
+        "address": "Razorpay Corporate Office"
+    },
+    "theme": {
+        "color": "#3399cc"
+    }
+};
+var rzp1 = new Razorpay(options);
+rzp1.on('payment.failed', function (response){
+        alert(response.error.code);
+        alert(response.error.description);
+        alert(response.error.source);
+        alert(response.error.step);
+        alert(response.error.reason);
+        alert(response.error.metadata.order_id);
+        alert(response.error.metadata.payment_id);
+});
+rzp1.open();
+
+  }
+
+  function verifyPayment(payment,order){
+    $.ajax({
+        url:'/verify-payment',
+        data:{
+            payment,
+            order
+        },
+        method:'post',
+        success:(response)=>{
+            if(response.status){
+                Swal.fire({
+            title: "Payment Successful",
+            text: "Your order has been placed successfully.",
+            icon: "success",
+            confirmButtonText: "OK",
+          }).then((result) => {
+            if (result.isConfirmed) {
+              // Load a new page or redirect to a different URL after the user clicks "OK"
+              window.location.href = "/landing-page"; // Replace with your desired URL
+            }
+          });
+            }else{
+            Swal.fire({
+            icon: 'error',
+            title: 'Payment Failed !',
+            text: 'Something went wrong!',
+            footer: '<a href="">Why do I have this issue?</a>'
+            }).then(()=>{
+                location.replace('/')
+            })
+            }
+        }
+    })
+  }
+ </script>

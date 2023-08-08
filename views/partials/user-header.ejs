@@ -48,7 +48,7 @@
           </div>
           <div class="header-right">
               <div class="search-style-2">
-                  <form action="#">
+                  <form action="/productSearch" >
                       <select class="select-active">
                           <option>All Categories</option>
                         <% if ( typeof categories !== 'undefined') { %>
@@ -58,7 +58,7 @@
                           <% } %>
                          
                       </select>
-                      <input type="text" placeholder="Search for items...">
+                      <input type="text" placeholder="Search for items..." name="search">
                   </form>
               </div>
               <div class="header-action-right">
