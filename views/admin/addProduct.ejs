@@ -152,7 +152,7 @@
                   </div>
                   <div class="card-body">
                     <% if (addProductSuccess) { %>
-                      <p class="alert alert-success mt-3 text-center"><%=addProductSuccess%></p>
+                      <p class="alert alert-success mt-3 text-center" onload="productAdded()"><%=addProductSuccess%></p>
                     <% } %>
       
                     <form action="" method="post" enctype="multipart/form-data">
@@ -173,8 +173,8 @@
                         </div>
                         <div class="col-md-6 mb-3">
                           <label class="form-label">Size</label>
-                          <select class="form-select" name="size" required="">
-                            <option value="">Select Size</option>
+                          <select class="form-select" name="size" >
+                            <option value="">N/A</option>
                             <option value="128 GB">128 GB</option>
                             <option value="256 GB">256 GB</option>
                             <option value="512 GB">512 GB</option>
@@ -441,6 +441,20 @@
         reader.readAsDataURL(input.files[0]);
       }
 </script>
+
+
+  <script>
+    function productAdeed(){
+      
+    Swal.fire({
+  position: 'top-end',
+  icon: 'success',
+  title: '<%=addProductSuccess%>',
+  showConfirmButton: false,
+  timer: 1500
+})
+    }
+  </script>
 
 
 

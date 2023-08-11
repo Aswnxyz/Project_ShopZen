@@ -34,7 +34,7 @@
                                 <div class="col-lg-4">
                                     <div class="mb-4">
                                         <label class="form-label">Mobile</label>
-                                        <input placeholder="Mobile" type="tel" class="form-control" name="mobile"
+                                        <input placeholder="Mobile" type="tel" class="form-control" pattern="[0-9]{10}" name="mobile"
                                             required id="user-phone">
 
                                     </div>
@@ -42,7 +42,7 @@
                                 <div class="col-lg-4">
                                     <div class="mb-4">
                                         <label class="form-label">PIN</label>
-                                        <input placeholder="PIN code" type="number" class="form-control"
+                                        <input placeholder="PIN code" type="text" pattern="[0-9]{6}" title="Please enter a valid 6-digit PIN code"  class="form-control"
                                             name="pincode" required id="user-pin-code">
 
                                     </div>

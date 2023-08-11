@@ -37,7 +37,7 @@ module.exports={
         try {
             const {categoryName} = req.body;
             console.log(req.body)
-            const existingCategory= await Category.find({name:categoryName,isActive:true});
+            const existingCategory= await Category.find({name:{ $regex: categoryName, $options: 'i' },isActive:true});
             // console.log(existingCategory)
             if(existingCategory.length){
                 // res.json({res:false})
@@ -77,12 +77,12 @@ module.exports={
             const {subcategoryName}=req.body;
             const {categoryName}=req.query;
             const existingCategory=await Category.findOne({name:categoryName});
-            if(existingCategory.subCategory.includes(subcategoryName)){
+            if(existingCategory.subCategory.some(sub => sub.toLowerCase() === subcategoryName.toLowerCase())){
                 res.redirect('/admin/category?subMessage=subCategory already exists!')
             }else{
                 existingCategory.subCategory.push(subcategoryName);
                 existingCategory.save();
-                req.session.successMessage = 'New Subategory added successfully!';
+                req.session.errMessage = 'New Subategory added successfully!';
                 res.redirect('/admin/category')
    
             }

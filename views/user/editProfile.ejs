@@ -26,7 +26,7 @@
                                     </div>
                                     <div class="col-sm-9 text-secondary">
                                         <input value="<%=userData.name%>" name="name" type="text" id="user-name"
-                                            onkeyup="">
+                                            onkeyup=""  pattern="^.*\S.*$" title="Name must only contain characters" required>
                                         <span id="name-error"></span>
                                     </div>
                                 </div>
@@ -37,7 +37,7 @@
                                     </div>
                                     <div class="col-sm-9 text-secondary">
                                         <input value="<%=userData.email%>" name="email" type="email" id="user-email"
-                                            onkeyup="">
+                                            onkeyup="" required>
                                         <span id="email-error"></span>
                                     </div>
                                 </div>
@@ -58,7 +58,7 @@
                                     </div>
                                     <div class="col-sm-9 text-secondary">
                                         <input value="<%=userData.phone%>" name="phone" type="tel" id="user-phone"
-                                            onkeyup="">
+                                            onkeyup="" pattern="[0-9]{10}" required>
                                         <span id="phone-error"></span>
                                     </div>
                                 </div>

@@ -4,6 +4,8 @@ const expressLayouts = require('express-ejs-layouts');
 
 const mongoose= require("mongoose");
 mongoose.connect("mongodb://127.0.0.1:27017/ShopZen");
+require('dotenv').config()
+
 
 const port = process.env.PORT || 3000;
 
@@ -37,7 +39,9 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use('/',userRouter)
 app.use('/admin',adminRouter)
 
-
+// app.get("*",(req,res)=>{
+//     res.redirect('/error')
+// })
 
 app.listen(port,()=>{
     console.log("Server started to running ... http://localhost:3000")

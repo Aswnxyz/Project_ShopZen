@@ -14,6 +14,7 @@ const { json } = require("body-parser");
 
 const getHome = async (req, res) => {
   try {
+    console.log(process.env.SHOPZEN_EMAIL)
     const categories = await Category.find({});
     const successMessage = req.session.successMessage;
     if (successMessage) {
@@ -44,8 +45,8 @@ const sendVerifyMail = async (name, email, userId) => {
       secure: false,
       requireTLS: true,
       auth: {
-        user: "shopzen105@gmail.com",
-        pass: "ytxphxoibpxglflx",
+        user: process.env.SHOPZEN_EMAIL,
+        pass: process.env.SHOPZEN_PASSWORD,
       },
     });
 
@@ -170,7 +171,7 @@ const verifyLogin = async (req, res) => {
   try {
     const email = req.body.email;
     const password = req.body.password;
-    const userData = await Customer.findOne({ email: email });
+    const userData = await Customer.findOne({ email: email, is_active:true });
     if (userData) {
       const passwordMatch = await bcrypt.compare(password, userData.password);
       if (passwordMatch) {
@@ -319,14 +320,28 @@ const productSearch=async (req,res)=>{
   
       const search=req.query.search
     
-    const data= await Products.find({
-      isActive:true,
-        $or: [
-            {name:{$regex:'.*'+search+'.*',$options:'i'}},
-            {category:{$regex:'.*'+search+'.*',$options:'i'}},
-            {subCategory:{$regex:'.*'+search+'.*',$options:'i'}}
-        ]
-    });
+      const data = await Products.aggregate([
+        {
+          $match: {
+            isActive: true,
+            $or: [
+              { name: { $regex: '.*' + search + '.*', $options: 'i' } },
+              { category: { $regex: '.*' + search + '.*', $options: 'i' } },
+              { subCategory: { $regex: '.*' + search + '.*', $options: 'i' } }
+            ]
+          }
+        },
+        {
+          $group: {
+            _id: "$name",
+            firstProduct: { $first: "$$ROOT" }
+          }
+        },
+        {
+          $replaceRoot: { newRoot: "$firstProduct" }
+        }
+      ]);
+      
     if (!data.length){
       res.render('no-products-found')
     }else{
@@ -337,7 +352,7 @@ const productSearch=async (req,res)=>{
   
       res.render("products", { data,categoryList });
     }
-
+ 
     
   } catch (error) {
     console.log(error.message)
@@ -347,6 +362,9 @@ const productSearch=async (req,res)=>{
 //Get_Products
 const getProducts = async (req, res) => {
   try {
+
+    const {sort}=req.query;
+    console.log(req.query)
     console.log('BODY :::',req.body)
     const priceLimit = req.body.price
 
@@ -397,7 +415,39 @@ const getProducts = async (req, res) => {
   }
   
   console.log('query::', query)
-  const data = await Products.find(query);
+  // const data = await Products.find(query);
+
+  const page = parseInt(req.query.page) || 1;
+  const perPage = 8;
+
+  // Build the aggregation pipeline
+  const aggregationPipeline= [
+    {
+      $match: query
+    },
+    {
+      $group: {
+        _id: "$name",
+        firstProduct: { $first: "$$ROOT" }
+      }
+    },
+    {
+      $replaceRoot: { newRoot: "$firstProduct" }
+    }
+  ];
+
+  if (sort === 'hightToLow') {
+    aggregationPipeline.push({ $sort: { price: -1 } }); // Sort by price high to low
+  } else if (sort === 'lowToHigh') {
+    aggregationPipeline.push({ $sort: { price: 1 } }); // Sort by price low to high
+  }
+
+
+const data = await Products.aggregate(aggregationPipeline)
+const totalProducts= data.length;
+const totalPages = Math.ceil(totalProducts / perPage);
+
+
   
   if (data.length === 0) {
     // Render the "No products found" page
@@ -422,16 +472,8 @@ const getProducts = async (req, res) => {
 };
 
 
-// const filterProducts= async (req,res)=>{
-// try {
-  
-// } catch (error) {
-  
-// }
-// }
 
-
-
+//View_Products
 const viewProduct = async (req, res) => {
   try {
     console.log('rqueryyyyy',req.query)
@@ -440,7 +482,9 @@ const viewProduct = async (req, res) => {
     console.log("PRODUCTTTTTTTTT:",product)
     const wishlist= await Wishlist.findOne({userId:new ObjectId(req.session.user_id)});
     console.log('wishlist::::', wishlist)
-    res.render("productDetails", { product, wishlist });
+    const data = await Products.find({name:product.name, totalQty: { $gte: 1 }},{_id:0,size:1})
+    const sizeData = data.map(sizeObj => sizeObj.size);
+    res.render("productDetails", { product, wishlist,sizeData });
 
   } catch (error) {
     console.log(error.message);
@@ -450,9 +494,10 @@ const viewProduct = async (req, res) => {
 //orders_page
 const getOrders = async (req, res) => {
   try {
+    const userId = req.session.user_id;
     const page = parseInt(req.query.page) || 1;
     const perPage = 10;
-    const totalOrders = await Orders.countDocuments();
+    const totalOrders = await Orders.find({userId:new ObjectId(userId), paymentStatus: { $ne: "processing" }}).count()
     const totalPages = Math.ceil(totalOrders / perPage);
 
     let search = "";
@@ -460,13 +505,11 @@ const getOrders = async (req, res) => {
         search = req.query.orderId
     }
 
-    const userId = req.session.user_id;
     const orders = await Orders.find({
        userId: new ObjectId(userId) ,
+       paymentStatus: { $ne: "processing" },
        $or: [
-
-        { orderId: { $regex: '.*' + search + '.*', $options: 'i' } },
-        
+        { orderId: { $regex: '.*' + search + '.*', $options: 'i' } },   
     ]
       })
     .sort({ createdAt: -1 }) // Assuming you want to sort by creation date in descending order
@@ -516,6 +559,7 @@ const OrderDetails = async (req, res) => {
         },
       },
     ]);
+
     res.render("orderDetails", { orderDetails, products });
   } catch (error) {
     console.log(error.message);
@@ -610,7 +654,8 @@ const getWishlist=async (req,res)=>{
                 name: 1,
                 images: 1,
                 price: 1,
-                description:1
+                description:1,
+                size:1
               }
             }
           ],
@@ -626,7 +671,8 @@ const getWishlist=async (req,res)=>{
           name: "$product.name",
           images: "$product.images",
           price: "$product.price",
-          description: "$product.description"
+          description: "$product.description",
+          size:"$product.size"
         }
       }
     ]);
@@ -697,7 +743,13 @@ const deleteWishlist= async (req,res)=>{
 }
 
 
-
+const error = async(req,res)=>{
+  try {
+    res.render('page-404')
+  } catch (error) {
+    
+  }
+}
 
 
 
@@ -718,10 +770,10 @@ module.exports = {
   getOrders,
   OrderDetails,
   cancelOrder,
-  // filterProducts,
   returnOrder,
   getWishlist,
   addToWishlist,
   deleteWishlist,
+  error
   
 };

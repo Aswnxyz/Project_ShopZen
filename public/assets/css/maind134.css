@@ -4515,9 +4515,12 @@ table .product-thumbnail img {
 .product-color-black {
   background: #000000;
 }
+.product-color-silver {
+  background: #c0c0c0;
+}
 
 .product-color-orange {
-  background: #ffbb51;
+  background: #f3aa35;
 }
 
 .product-color-cyan {
@@ -4525,7 +4528,7 @@ table .product-thumbnail img {
 }
 
 .product-color-green {
-  background: #38cf46;
+  background: #014608;
 }
 
 .product-color-purple {

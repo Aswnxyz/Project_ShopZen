@@ -53,6 +53,7 @@
                   </td>
 
                   <td class="text-center" data-title="Stock">
+                    <% if (cart[i].item.totalQty) { %>
                     <div class="detail-qty border radius m-auto">
                       <a
                         href="#"
@@ -73,7 +74,12 @@
                     <% if(cart[i].item.totalQty < 8 ) { %>
                     <span>Only <%=cart[i].item.totalQty%> left</span>
                     <% } %>
+                    <% }else { %>
+                      <span id="outOfStock" class="text-danger">Out Of Stock</span>
+                      <% } %>
+
                   </td>
+
                   <td
                     class="text-right subtotal"
                     data-title="Subtotal"
@@ -178,7 +184,7 @@
                     </tbody>
                   </table>
                 </div>
-                <a href="/user-checkout" class="btn">
+                <a href="/user-checkout" class="btn btn-proceed-to-checkout" >
                   <i class="fi-rs-box-alt mr-10"></i> Proceed To CheckOut</a
                 >
               </div>
@@ -378,4 +384,67 @@
   document.addEventListener("DOMContentLoaded", function () {
     calculateCartTotal();
   });
+</script>
+
+
+
+<!-- Any Product Is Out Of Stock That Time Chekout Button Will Be Disable  -->
+<!-- <script>
+// Get the "Proceed to Checkout" button element
+const checkoutButton = document.querySelector(".btn-proceed-to-checkout");
+
+// Function to check if any product is out of stock
+function checkStockStatus(cartItems) {
+  for (const item of cartItems) {
+    if (item.item.totalQty === 0) {
+      return true; // Out of stock item found
+    }
+  }
+  return false; // No out of stock items
+}
+
+// Function to update "Proceed to Checkout" button status
+function updateCheckoutButtonStatus() {
+  
+  const cartItems = <%- JSON.stringify(cart) %>; // Replace with your cart data
+  console.log(cartItems)
+  const isAnyOutOfStock = checkStockStatus(cartItems);
+
+  if (isAnyOutOfStock) {
+    checkoutButton.style.pointerEvents = 'none'
+    checkoutButton.style.opacity = '0.5'; 
+  } else {
+    checkoutButton.style= ''
+  }
+}
+
+// Call the function to update the button status when the page loads
+document.addEventListener("DOMContentLoaded", updateCheckoutButtonStatus);
+
+
+</script> -->
+
+
+<script>
+  const outOfStockSpan = document.getElementById('outOfStock');
+  const checkoutButton = document.querySelector(".btn-proceed-to-checkout");
+
+  if(outOfStockSpan){
+    checkoutButton.removeAttribute("href")
+    checkoutButton.style.opacity = '0.5'; 
+  }
+  
+
+  checkoutButton.addEventListener('click', function() {
+  if(outOfStockSpan){
+    Toastify({
+        text: 'Remove unavailable items !',
+        duration: 3000,
+        backgroundColor: '#ff0000',
+        gravity: 'center', // Display the toast at the top of the screen
+        position: 'right', // Center the toast horizontally
+        stopOnFocus: true,
+      }).showToast();
+  }
+    });
 </script>

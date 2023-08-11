@@ -23,7 +23,7 @@ userRoute.get("/",userController.getHome)
 //Login
 userRoute.get("/login",sessionHandling.authenticationCheck,userController.loginLoad);
 userRoute.post('/login',userController.verifyLogin)
-userRoute.get('/logout',sessionHandling.checkingUser,userController.userLogout)
+userRoute.get('/logout',userController.userLogout)
 //Sign_up & With_OTP
 userRoute.get("/register",sessionHandling.authenticationCheck,(req,res)=>{res.render("signUp")});
 userRoute.post("/register",userController.insertUser)
@@ -82,6 +82,6 @@ userRoute.post("/return-order",userController.returnOrder);
 // userRoute.get("*",(req,res)=> res.status(404).render('page-404'))
 
 
-
+userRoute.get("/error",userController.error);
 
 module.exports= userRoute

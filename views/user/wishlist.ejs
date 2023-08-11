@@ -42,7 +42,7 @@
                                     </td>
                                     <td class="text-right" data-title="Cart">
                                         <% if (products[i].quantity) { %>
-                                            <a href="/user-add-to-cart?productId=<%=products[i].item%>" class="btn btn-sm"><i class="fi-rs-shopping-bag mr-5"></i>Add to cart</a>
+                                            <a href="/user-add-to-cart?productId=<%=products[i].item%>&size=<%=products[i].size%>" class="btn btn-sm"><i class="fi-rs-shopping-bag mr-5"></i>Add to cart</a>
                                             <% }else{ %>
                                                 <button class="btn btn-sm" style="pointer-events: none;opacity: 0.5;"><i class="fi-rs-shopping-bag mr-5"></i>Add to cart</button>
                                                 <% } %>

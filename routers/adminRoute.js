@@ -32,7 +32,7 @@ adminRoute.get("/users",sessionHandling.checkingAdmin,adminController.userLoad);
 //Block_User
 adminRoute.get("/block-user",sessionHandling.checkingAdmin,adminController.blockUser);
 adminRoute.get("/unblock-user",sessionHandling.checkingAdmin,adminController.unBlockUser);
-adminRoute.get("/products",sessionHandling.checkingAdmin,productController.viewProducts);
+adminRoute.get("/products",sessionHandling.checkingAdmin,productController.viewProducts); 
 adminRoute.get("/edit-product",sessionHandling.checkingAdmin,productController.getEditProducts);
 adminRoute.post("/edit-product",productController.postEditProducts);
 adminRoute.get("/delete-product",sessionHandling.checkingAdmin,productController.deleteProduct);
@@ -48,7 +48,7 @@ adminRoute.get("/add-product",sessionHandling.checkingAdmin,productController.ge
 adminRoute.post("/add-product",upload,productController.postAddProduct);
 adminRoute.get("/orders",sessionHandling.checkingAdmin,upload,adminController.getUserOrders);
 adminRoute.get('/user-orderDetails/:id',sessionHandling.checkingAdmin,adminController.userOrderDetails)
-adminRoute.post('/change-status',sessionHandling.checkingAdmin,adminController.changeOrderStatus)
+adminRoute.post('/change-status',adminController.changeOrderStatus)
 //Date_Wise_Report
 adminRoute.post('/date-wise-report',adminController.dateWiseReport)
 

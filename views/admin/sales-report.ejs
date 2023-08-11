@@ -154,6 +154,18 @@
     $(document).ready(function () {
         $('#pdf').click(function (e) {
             event.preventDefault();
+
+            Swal.fire({
+      title: 'Generate PDF',
+      text: 'Do you want to generate and download the PDF report?',
+      icon: 'question',
+      showCancelButton: true,
+      confirmButtonColor: '#3085d6',
+      cancelButtonColor: '#d33',
+      confirmButtonText: 'Yes, generate PDF',
+      cancelButtonText: 'Cancel'
+    }).then((result)=>{
+        if (result.isConfirmed){
             var element = document.getElementById('sales-report');
             var timePeriod = document.querySelector('[name="timePeriod"]').value;
 
@@ -165,7 +177,16 @@
                 html2canvas: { scale: 10 },
                 jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' }
             };
+
             html2pdf().set(opt).from(element).save();
+
+            Swal.fire({
+          title: 'PDF Generated',
+          text: 'The PDF report has been generated and downloaded successfully.',
+          icon: 'success'
+        });
+        }
+    })   
         })
     })
 </script>

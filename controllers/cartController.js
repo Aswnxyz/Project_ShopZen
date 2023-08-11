@@ -8,8 +8,8 @@ const ObjectId = require("mongodb").ObjectId;
 const Razorpay = require('razorpay');
 
 var instance = new Razorpay({
-  key_id: 'rzp_test_SfiHz94Pmnimk2',
-  key_secret: 'vzBBPFl2ZfvGHmiN6LOIAwn1',
+  key_id: process.env.RAZORPAY_KEY_ID,
+  key_secret: process.env.RAZORPAY_KEY_SECRET,
 });
 
 module.exports = {
@@ -45,23 +45,35 @@ module.exports = {
   //Add_To_Cart
   addToCart: async (req, res) => {
     try {
-      const { productId } = req.query;
+
+      console.log('-=-=-=--=',req.query)
+      const { productId,size } = req.query;
       console.log(productId);
       const quantity = parseFloat(req.query.quantity || 1);
       const productObj = {
         item: productId,
         quantity: quantity,
+        size:size
       };
+      const limitedQuantity = Math.min(quantity, 10);
+
       const userId = req.session.user_id;
       const userCart = await Cart.findOne({ userId: userId });
+      const product=await Product.findOne({_id:new ObjectId(productId)});
+      console.log('product_Here::::',product)
       if (userCart) {
         const prodExist = userCart.products.findIndex(
           (products) => products.item == productId
         );
         if (prodExist !== -1) {
+          const newTotalQuantity = userCart.products[prodExist].quantity + limitedQuantity;
+
+          
+        if (newTotalQuantity <= 10 && newTotalQuantity <= product.totalQty) {
+          // Update quantity in cart
           await Cart.updateOne(
             { userId: userId, "products.item": productId },
-            { $inc: { "products.$.quantity": 1 } }
+            { $set: { "products.$.quantity": newTotalQuantity } }
           );
           const newCart = await Cart.findOne({ userId: userId });
           const cartCount = newCart.products.length;
@@ -70,6 +82,23 @@ module.exports = {
           } else {
             res.redirect("/user-cart");
           }
+        } else {
+          if (req.xhr) {
+          // Respond with an error message if quantity exceeds limit
+          res.json({ status: false, message: "Quantity exceeds limit" });
+          return;
+          }else{
+            res.redirect("/user-cart")
+          }
+
+
+        }
+
+          // await Cart.updateOne(
+          //   { userId: userId, "products.item": productId },
+          //   { $inc: { "products.$.quantity": 1 } }
+          // );
+       
         } else {
           await Cart.updateOne(
             { userId: userId },
@@ -102,6 +131,7 @@ module.exports = {
     }
   },
 
+  //Change_Quantity
   changeProductQuantity: async (req, res) => {
     try {
       const userId = req.session.user_id;
@@ -145,6 +175,7 @@ module.exports = {
     }
   },
 
+  //Delete_from_Cart
   deleteFromCart: async (req, res) => {
     try {
       const { id } = req.query;
@@ -172,6 +203,9 @@ module.exports = {
       const productsPromises = cartProducts.map(async (cartProduct) => {
         const productId = cartProduct.item;
         const productDetails = await Product.findById(productId);
+        if(productDetails.totalQty < cartProduct.quantity){
+          res.redirect('/user-cart')
+        }
         cartTotal += productDetails.price * cartProduct.quantity;
         return { item: productDetails, quantity: cartProduct.quantity };
       });
@@ -214,18 +248,23 @@ module.exports = {
         return result;
       };
 
+
       const { deliveryAddress, payment_option } = req.body;
-      console.log(deliveryAddress);
-      const address = await Address.findOne({ _id: deliveryAddress });
       const paymentStatus =payment_option === 'COD' ? 'pending' : 'processing';
-      const deliveryDetails = {
+      let deliveryDetails;
+      if(deliveryAddress){
+      const address = await Address.findOne({ _id: deliveryAddress });
+       deliveryDetails = {
         mobile: address.mobile,
         locality: address.locality,
         area: address.area,
-        district: address.district,
+        district: address.district, 
         pincode: address.pincode,
         state: address.state,
       };
+    }else{
+      return res.status(404).json({err:true})
+    }
 
       const products = await Cart.aggregate([
         {
@@ -239,6 +278,7 @@ module.exports = {
             userId: 1,
             item: { $toObjectId: "$products.item" },
             quantity: "$products.quantity",
+            size: "$products.size"
           },
         },
         {
@@ -257,6 +297,7 @@ module.exports = {
             _id: 0,
             item: "$product._id",
             quantity: 1,
+            size:1,
             name: "$product.name",
             images: "$product.images",
             price: "$product.price",
@@ -323,14 +364,7 @@ module.exports = {
       await orderData.save();
       console.log(orderData)
 
-      for (let i = 0; i < products.length; i++) {
-        await Product.updateOne(
-          { _id: new ObjectId(products[i].item) },
-          { $inc: { totalQty: -products[i].quantity } } // Corrected access to the quantity value
-        );
-      }
-
-      await Cart.deleteOne({ userId: userId });
+     
 
       if(payment_option=== 'Razorpay'){
         //Generate_Razorpay  
@@ -346,10 +380,20 @@ module.exports = {
 
 
       }else if(payment_option === "COD"){
+        for (let i = 0; i < products.length; i++) {
+          await Product.updateOne(
+            { _id:new ObjectId(products[i].item) },
+            { $inc: { totalQty: -products[i].quantity } } // Corrected access to the quantity value
+          );
+        }
+  
+        await Cart.deleteOne({ userId: userId });
+
         res.json({paymentOption: 'COD'})
       }
 
     } catch (error) {
+      res.status(404).json({paymentFailed:true})
       console.log(error.message);
     }
   },
@@ -359,6 +403,47 @@ module.exports = {
     try {
         const {payment,order}=req.body
         console.log(payment,order);
+
+        const products = await Order.aggregate([
+          {
+            $match: { orderId: order.receipt },
+          },
+          {
+            $unwind: "$products",
+          },
+          {
+            $project: {
+              userId: 1,
+              item: "$products.item",
+              quantity: "$products.quantity",
+            },
+          },
+          {
+            $lookup: {
+              from: "products",
+              localField: "item",
+              foreignField: "_id",
+              as: "product",
+            },
+          },
+          {
+            $unwind: "$product",
+          },
+          {
+            $project: {
+              _id: 0,
+              item: "$product._id",
+              quantity: 1,
+              size:1,
+              name: "$product.name",
+              images: "$product.images",
+              price: "$product.price",
+            }, 
+          },
+        ]);
+
+
+
        const crypto = require('crypto');
        const hmac = crypto.createHmac('sha256', 'vzBBPFl2ZfvGHmiN6LOIAwn1')
        .update(payment.razorpay_order_id + "|" + payment.razorpay_payment_id)
@@ -369,6 +454,14 @@ module.exports = {
             {orderId:order.receipt},
             {$set:{paymentStatus:'completed'}}
         );
+        for (let i = 0; i < products.length; i++) {
+          await Product.updateOne(
+            { _id:new ObjectId(products[i].item) },
+            { $inc: { totalQty: -products[i].quantity } } // Corrected access to the quantity value
+          );
+        }
+  
+        await Cart.deleteOne({ userId: req.session.user_id });
         res.json({status:true})
        }else{
         res.json({status:false})
@@ -378,3 +471,4 @@ module.exports = {
     }
   }
 };
+ 

@@ -97,10 +97,10 @@ await Product.updateOne(
         try {
             const images = req.files.map(file => path.basename(file.path));
             console.log(req.body);
-            const softDeleted= await Product.findOne({name:req.body.name,isActive:false});
+            const softDeleted= await Product.findOne({name:req.body.name,isActive:false,size:req.body.size,color:req.body.color});
             if(softDeleted){
                 await Product.updateOne(
-                    {name:req.body.name},
+                    {_id:softDeleted._id},
                     {$set:{isActive:true}}
                 )
             }else{
@@ -118,7 +118,6 @@ await Product.updateOne(
                 await product.save();
             }
 
-            
             res.redirect('/admin/add-product?addProductSuccess=Product%20added%20successfully!')
         } catch (error) {
             console.log(error.message)

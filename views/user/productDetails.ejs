@@ -105,44 +105,41 @@
                                         </ul>
                                     </div>
                                     <% if(product.category!== 'cameras') { %>
+                                        <span id="colorErrorMessage" class="text-danger hidden">Please select a color !</span>
                                     <div class="attr-detail attr-color mb-15">
                                         <strong class="mr-10">Color</strong>
-                                        <ul class="list-filter color-filter">
-
-                                            <li><a href="#" data-color="Red"><span class="product-color-red"></span></a></li>
-                                            <!-- <li><a href="#" data-color="Yellow"><span class="product-color-yellow"></span></a></li> -->
-                                            <li ><a href="#" data-color="White"><span class="product-color-white"></span></a></li>
-                                            <li><a href="#" data-color="Orange"><span class="product-color-orange"></span></a></li>
-                                            <li><a href="#" data-color="Cyan"><span class="product-color-cyan"></span></a></li>
-                                            <li><a href="#" data-color="Green"><span class="product-color-green"></span></a></li>
-                                            <li><a href="#" data-color="Purple"><span class="product-color-purple"></span></a></li>
+                                        <ul id="selectedColor" class="list-filter color-filter">
+                                            
+                                            <li><a href="#" data-color="white"><span class="product-color-white"></span></a></li>
+                                            <li><a href="#" data-color="orange"><span class="product-color-orange"></span></a></li>
+                                            <li><a href="#" data-color="black"><span class="product-color-black"></span></a></li>
+                                            <li><a href="#" data-color="green"><span class="product-color-green"></span></a></li>
+                                            <li><a href="#" data-color="silver"><span class="product-color-silver"></span></a></li>
                                         </ul>
                                     </div>
                                     <% } %>
-
-
-                                    <% if(product.category === 'smartphone') { %>
+                                    <% if(product.category === 'smartphone' || product.category === 'Laptops') { %>
+                                        <span id="sizeErrorMessage" class="text-danger hidden">Please select a size !</span>
                                     <div class="attr-detail attr-size">
                                         <strong class="mr-10">Size</strong>
-                                        <ul class="list-filter size-filter font-small">
-                                            <li><a href="#">128 GB</a></li>
+                                        <ul id="selectedSize" class="list-filter size-filter font-small">
+                                            <!-- <li><a href="#">128 GB</a></li>
                                             <li class="active"><a href="#">256 GB</a></li>
                                             <li><a href="#">512 GB</a></li>
-                                            <li><a href="#">1 TB</a></li>
+                                            <li><a href="#">1 TB</a></li> -->
+
+
+                                                <% const availableSizes=['128 GB','256 GB','512 GB','1 TB']; %>
+                                            <% availableSizes.forEach(size => { %>
+                                                <li class="<%= size === product.size ? 'active' : (sizeData.includes(size) ? '' : 'empty') %>">
+                                                  <a href="#" data-size="<%=size%>" ><%= size %></a>
+                                                </li>
+                                              <% }); %>
                                             <!-- <li><a href="#">XXL</a></li> -->
                                         </ul>
+                                        
                                     </div>
-                                    <% }else if (product.category === 'Laptops') { %>
-                                        <div class="attr-detail attr-size">
-                                            <strong class="mr-10">Size</strong>
-                                            <ul class="list-filter size-filter font-small">
-                                                <li><a href="#">128 GB</a></li>
-                                                <li class="active"><a href="#">256 GB</a></li>
-                                                <li><a href="#">512 GB</a></li>
-                                                <li><a href="#">1 TB</a></li>
-                                                <!-- <li><a href="#">XXL</a></li> -->
-                                            </ul>
-                                        </div>
+                                  
                                         <% } %>
 
                                     <div class="bt-1 border-color-1 mt-30 mb-30"></div>
@@ -732,8 +729,30 @@
     </section> 
 </main>
 
+
+
 <script>
+
+
+
     function redirectToCart() {
+
+        const colorOptions = document.querySelectorAll('#selectedColor li');
+        const sizeOptions = document.querySelectorAll('#selectedSize li');
+  let selectedColor;
+  let selectedSize;
+
+  colorOptions.forEach(colorOption => {
+        if (colorOption.classList.contains('active')) {
+          selectedColor = colorOption.querySelector('a').getAttribute('data-color');
+        }
+      });
+  sizeOptions.forEach(sizeOption => {
+        if (sizeOption.classList.contains('active')) {
+          selectedSize = sizeOption.querySelector('a').getAttribute('data-size');
+        }
+      });
+        
         
   // Get the quantity value from the DOM element
   const quantityElement = document.querySelector('.qty-val');
@@ -742,10 +761,19 @@
   console.log(quantityValue); // Output: 1 (or the current value in the .qty-val element)
 
   // Your other code here...
-
-
+  
+  if(!selectedColor && '<%=product.category%>'!== 'cameras'){
+    const colorErrorMessage= document.getElementById('colorErrorMessage');
+    colorErrorMessage.classList.remove('hidden');
+  }else if(!selectedSize && ('<%=product.category%>'=== 'smartphone' || '<%=product.category%>'=== 'Laptops')){
+    const sizeErrorMessage= document.getElementById('sizeErrorMessage');
+    sizeErrorMessage.classList.remove('hidden');
+  }else{
+    window.location.href = `/user-add-to-cart?productId=<%=product._id%>&quantity=${quantityValue}&color=${selectedColor}&size=${selectedSize}`;
+  }
+  
       // Replace 'your_link_here' with the actual URL you want the button to lead to
-      window.location.href = `/user-add-to-cart?productId=<%=product._id%>&quantity=${quantityValue}`;
+
     }
   </script>
 
@@ -797,3 +825,12 @@
       qtyDownButton.style.opacity = '0.5';    }
     });
   </script> 
+
+
+<style>
+    
+    .empty {
+      opacity: 0.5;
+      pointer-events: none;
+    }
+  </style>

@@ -1,8 +1,16 @@
+const Customer= require('../models/Customer')
 
 module.exports={
-    checkingUser:(req,res,next)=>{
+    checkingUser:async (req,res,next)=>{
         if(req.session.user_id){
+           const userData =await Customer.findOne({_id:req.session.user_id, is_active:true});
+           if(userData){
             next()
+           }else{
+            res.redirect('/logout')
+           }
+                
+           
         }else{
 
             if (req.xhr) {

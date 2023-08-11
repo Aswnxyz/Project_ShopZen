@@ -44,7 +44,18 @@ const dashBoard = async (req, res) => {
     console.log(totalOrders);
     const orders = totalOrders[0] ? totalOrders[0].totalOrders : 0;
     console.log(orders);
-    const products = await Products.countDocuments();
+    const productsData = await Products.aggregate([
+      {
+        $group: {
+          _id: "$name",
+          firstProduct: { $first: "$$ROOT" }
+        }
+      },
+      {
+        $replaceRoot: { newRoot: "$firstProduct" }
+      }
+    ]);
+    const products= productsData.length;
 
     console.log(`Total products: ${products}`);
     const totalSales = monthlySales[0] ? monthlySales[monthlySales.length-1].totalSales : 0;
@@ -96,6 +107,15 @@ const dashBoard = async (req, res) => {
     const result = await Products.aggregate([
       {
         $group: {
+          _id: "$name",
+          firstProduct: { $first: "$$ROOT" }
+        }
+      },
+      {
+        $replaceRoot: { newRoot: "$firstProduct" }
+      },
+      {
+        $group: {
           _id: "$category",
           count: { $sum: 1 },
         },
@@ -106,7 +126,7 @@ const dashBoard = async (req, res) => {
         },
       },
     ]);
-    console.log(result);
+    console.log('RESULT' ,result);
     const categoryWise = {};
     result.forEach((item) => {
       categoryWise[item._id] = item.count;
@@ -443,7 +463,7 @@ const getUserOrders = async (req, res) => {
     }
     const page = parseInt(req.query.page) || 1;
     const perPage = 10;
-    const totalOrders = await Order.countDocuments();
+    const totalOrders = await Order.find({paymentStatus: { $ne: "processing" }}).count()
     const totalPages = Math.ceil(totalOrders / perPage);
 
     let search = "";
@@ -451,6 +471,7 @@ const getUserOrders = async (req, res) => {
       search = req.query.orderId;
     }
     const allOrders = await Order.find({
+      paymentStatus: { $ne: "processing" },
       $or: [{ orderId: { $regex: ".*" + search + ".*", $options: "i" } }],
     })
       .sort({ createdAt: -1 }) // Assuming you want to sort by creation date in descending order
@@ -529,10 +550,20 @@ const userOrderDetails = async (req, res) => {
 const changeOrderStatus = async (req, res) => {
   try {
     const { orderId, newStatus } = req.body;
-    await Order.updateOne(
-      { _id: new ObjectId(orderId) },
-      { $set: { orderStatus: newStatus } }
-    );
+
+    const orderData= await Order.findOne({_id:new ObjectId(orderId)});
+    if(orderData.paymentStatus === "pending"){
+      await Order.updateOne(
+        { _id: new ObjectId(orderId) },
+        { $set: { orderStatus: newStatus , paymentStatus:"completed"} }
+      );
+    }else{
+      await Order.updateOne(
+        { _id: new ObjectId(orderId) },
+        { $set: { orderStatus: newStatus } }
+      );
+    }
+   
     req.session.successMessage = ` Order Status Changed to ${newStatus} `;
 
     const products = await Order.aggregate([

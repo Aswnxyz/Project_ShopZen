@@ -350,34 +350,44 @@
         data: formData,
         success: function (response) {
           // Handle the success response from the server
-          switch(response.paymentOption){
-            case 'COD':
-            Swal.fire({
-            title: "Thank You!",
-            text: "Your order has been placed successfully.",
-            icon: "success",
-            confirmButtonText: "OK",
-          }).then((result) => {
-            if (result.isConfirmed) {
-              // Load a new page or redirect to a different URL after the user clicks "OK"
-              window.location.href = "/landing-page"; // Replace with your desired URL
-            }
-          });
-          break;
-          case 'Razorpay':
-          
-          razorpayPayment(response.order)
+          switch (response.paymentOption) {
+            case "COD":
+              Swal.fire({
+                title: "Thank You!",
+                text: "Your order has been placed successfully.",
+                icon: "success",
+                confirmButtonText: "OK",
+              }).then((result) => {
+                if (result.isConfirmed) {
+                  // Load a new page or redirect to a different URL after the user clicks "OK"
+                  window.location.href = "/landing-page"; // Replace with your desired URL
+                }
+              });
+              break;
+            case "Razorpay":
+              razorpayPayment(response.order);
 
-
-          break;
-
+              break;
           }
-
-         
+          
           // You can update the UI or redirect the user here
         },
         error: function (xhr, status, error) {
           // Handle errors
+          var jsonResponse = JSON.parse(xhr.responseText);
+          if (jsonResponse.err) {
+            Swal.fire("The Address?", "That thing is still there?", "question");
+            // You can display the error message to the user or perform other actions
+          } else if (jsonResponse.paymentFailed) {
+            Swal.fire({
+              icon: "error",
+              title: "Payment Failed !",
+              text: "Something went wrong!",
+              footer: '<a href="">Why do I have this issue?</a>',
+            }).then(() => {
+              location.replace("/");
+            });
+          }
           console.error("Error placing order: " + error);
           // Display an error message to the user
         },
@@ -385,58 +395,72 @@
     });
   });
 
-  function razorpayPayment(order){
+  function razorpayPayment(order) {
     var options = {
-    "key": "rzp_test_SfiHz94Pmnimk2", // Enter the Key ID generated from the Dashboard
-    "amount": order.amount, // Amount is in currency subunits. Default currency is INR. Hence, 50000 refers to 50000 paise
-    "currency": "INR",
-    "name": "ShopZen",
-    "description": "Test Transaction",
-    "image": "/assets/imgs/theme/ShopZen.png",
-    "order_id": order.id, //This is a sample Order ID. Pass the `id` obtained in the response of Step 1
-    "handler": function (response){
+      key: "rzp_test_SfiHz94Pmnimk2", // Enter the Key ID generated from the Dashboard
+      amount: order.amount, // Amount is in currency subunits. Default currency is INR. Hence, 50000 refers to 50000 paise
+      currency: "INR",
+      name: "ShopZen",
+      description: "Test Transaction",
+      image: "/assets/imgs/theme/ShopZen.png",
+      order_id: order.id, //This is a sample Order ID. Pass the `id` obtained in the response of Step 1
+      timeout: 300000,
+      handler: function (response) {
         // alert(response.razorpay_payment_id);
         // alert(response.razorpay_order_id);
         // alert(response.razorpay_signature);
-        verifyPayment(response,order)
-    },
-    "prefill": {
-        "name": "Gaurav Kumar",
-        "email": "gaurav.kumar@example.com",
-        "contact": "9000090000"
-    },
-    "notes": {
-        "address": "Razorpay Corporate Office"
-    },
-    "theme": {
-        "color": "#3399cc"
-    }
-};
-var rzp1 = new Razorpay(options);
-rzp1.on('payment.failed', function (response){
-        alert(response.error.code);
-        alert(response.error.description);
-        alert(response.error.source);
-        alert(response.error.step);
-        alert(response.error.reason);
-        alert(response.error.metadata.order_id);
-        alert(response.error.metadata.payment_id);
-});
-rzp1.open();
+        verifyPayment(response, order);
+      },
+      prefill: {
+        name: "Gaurav Kumar",
+        email: "gaurav.kumar@example.com",
+        contact: "9000090000",
+      },
+      notes: {
+        address: "Razorpay Corporate Office",
+      },
+      theme: {
+        color: "#3399cc",
+      },
+    };
+    var rzp1 = new Razorpay(options);
+    rzp1.on("payment.failed", function (response) {
+      alert(response.error.code);
+      alert(response.error.description);
+      alert(response.error.source);
+      alert(response.error.step);
+      alert(response.error.reason);
+      alert(response.error.metadata.order_id);
+      alert(response.error.metadata.payment_id);
+    });
+    // rzp1.on("timeout", function (response) {
+    //   // Handle payment timeout
+    //   Swal.fire({
+    //     title: "Payment Timed Out !",
+    //     showClass: {
+    //       popup: "animate__animated animate__fadeInDown",
+    //     },
+    //     hideClass: {
+    //       popup: "animate__animated animate__fadeOutUp",
+    //     },
+    //   });
+    //   console.log(response);
+    // });
 
+    rzp1.open();
   }
 
-  function verifyPayment(payment,order){
+  function verifyPayment(payment, order) {
     $.ajax({
-        url:'/verify-payment',
-        data:{
-            payment,
-            order
-        },
-        method:'post',
-        success:(response)=>{
-            if(response.status){
-                Swal.fire({
+      url: "/verify-payment",
+      data: {
+        payment,
+        order,
+      },
+      method: "post",
+      success: (response) => {
+        if (response.status) {
+          Swal.fire({
             title: "Payment Successful",
             text: "Your order has been placed successfully.",
             icon: "success",
@@ -447,17 +471,46 @@ rzp1.open();
               window.location.href = "/landing-page"; // Replace with your desired URL
             }
           });
-            }else{
-            Swal.fire({
-            icon: 'error',
-            title: 'Payment Failed !',
-            text: 'Something went wrong!',
-            footer: '<a href="">Why do I have this issue?</a>'
-            }).then(()=>{
-                location.replace('/')
-            })
-            }
+        } else {
+          Swal.fire({
+            icon: "error",
+            title: "Payment Failed !",
+            text: "Something went wrong!",
+            footer: '<a href="">Why do I have this issue?</a>',
+          }).then(() => {
+            location.replace("/");
+          });
         }
-    })
+      },
+      error: (xhr, status, error) => {
+        Swal.fire({
+          icon: "error",
+          title: "Payment Failed !",
+          text: "Something went wrong!",
+          footer: '<a href="">Why do I have this issue?</a>',
+        }).then(() => {
+          location.replace("/");
+        });
+      },
+    });
   }
- </script>
+</script>
+
+
+<% if (typeof errMessage !== 'undefined') { %>
+  <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
+  <script>
+      const str='<%= errMessage %>'
+    // Display the toast message for a successful login
+    Toastify({
+        text: "Insufficient stock!",
+        duration: 3000,
+        backgroundColor: "#FF0000",
+        gravity: "top", // Display the toast at the top of the screen
+        position: "center", // Center the toast horizontally
+        stopOnFocus: true,
+      }).showToast();
+
+
+  </script>
+<% } %>
