@@ -203,7 +203,7 @@
                     <tr>
                       <th>SubTotal</th>
                       <td class="product-subtotal" colspan="2">
-                        &#8377; <%=cartTotal%>
+                        &#8377; <%=cartSubTotal%>
                       </td>
                     </tr>
                     <tr>
@@ -225,6 +225,13 @@
                                             </td>
                                         </tr>
                                         {{else}} -->
+                    <% if (discountPrice) { %>
+                      <tr>
+                        <th>Coupon savings</th>
+                        <td class="coupon-savings" colspan="2">
+                          &#8377; <%=discountPrice%>
+                        </td>
+                      </tr>
                     <tr>
                       <th>Total</th>
                       <td colspan="2" class="product-subtotal">
@@ -233,6 +240,17 @@
                         >
                       </td>
                     </tr>
+                    <% }else { %>
+                    <tr>
+                      <th>Total</th>
+                      <td colspan="2" class="product-subtotal">
+                        <span class="font-xl text-brand fw-900"
+                          >&#8377; <%=cartTotal%></span
+                        >
+                      </td>
+                    </tr>
+                    <% } %>
+                    <input type="hidden" name="totalPrice" value="<%=cartTotal%>">
                     <!-- {{/if}} -->
                   </tbody>
                 </table>
@@ -369,7 +387,7 @@
 
               break;
           }
-          
+
           // You can update the UI or redirect the user here
         },
         error: function (xhr, status, error) {
@@ -496,21 +514,21 @@
   }
 </script>
 
-
 <% if (typeof errMessage !== 'undefined') { %>
-  <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
-  <script>
-      const str='<%= errMessage %>'
-    // Display the toast message for a successful login
-    Toastify({
-        text: "Insufficient stock!",
-        duration: 3000,
-        backgroundColor: "#FF0000",
-        gravity: "top", // Display the toast at the top of the screen
-        position: "center", // Center the toast horizontally
-        stopOnFocus: true,
-      }).showToast();
-
-
-  </script>
+<script
+  type="text/javascript"
+  src="https://cdn.jsdelivr.net/npm/toastify-js"
+></script>
+<script>
+  const str = "<%= errMessage %>";
+  // Display the toast message for a successful login
+  Toastify({
+    text: "Insufficient stock!",
+    duration: 3000,
+    backgroundColor: "#FF0000",
+    gravity: "top", // Display the toast at the top of the screen
+    position: "center", // Center the toast horizontally
+    stopOnFocus: true,
+  }).showToast();
+</script>
 <% } %>

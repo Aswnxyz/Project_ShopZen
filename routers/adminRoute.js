@@ -46,11 +46,18 @@ adminRoute.get("/deleteProdutSubcategory",sessionHandling.checkingAdmin,category
 adminRoute.post("/editCategoryName",categoryController.editCategoryName);
 adminRoute.get("/add-product",sessionHandling.checkingAdmin,productController.getAddProduct);
 adminRoute.post("/add-product",upload,productController.postAddProduct);
-adminRoute.get("/orders",sessionHandling.checkingAdmin,upload,adminController.getUserOrders);
+adminRoute.get("/orders",sessionHandling.checkingAdmin,adminController.getUserOrders);
 adminRoute.get('/user-orderDetails/:id',sessionHandling.checkingAdmin,adminController.userOrderDetails)
 adminRoute.post('/change-status',adminController.changeOrderStatus)
 //Date_Wise_Report
 adminRoute.post('/date-wise-report',adminController.dateWiseReport)
+//Coupon
+adminRoute.get('/coupons',sessionHandling.checkingAdmin,adminController.getCoupon)
+//Add-Coupon
+adminRoute.post('/coupons',adminController.postCoupon)
+//Delte_Coupon
+adminRoute.post('/delete-coupon',adminController.deleteCoupon)
+
 
 
 

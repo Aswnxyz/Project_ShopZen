@@ -3,9 +3,12 @@ const Cart = require("../models/Cart");
 const Product = require("../models/Products");
 const Address = require("../models/Address");
 const Order = require("../models/Orders");
+const Coupon = require("../models/Coupons");
 const { json } = require("body-parser");
 const ObjectId = require("mongodb").ObjectId;
 const Razorpay = require('razorpay');
+const { log } = require("console");
+const { dateWiseReport } = require("./adminController");
 
 var instance = new Razorpay({
   key_id: process.env.RAZORPAY_KEY_ID,
@@ -36,7 +39,12 @@ module.exports = {
       const cartItems = await Promise.all(productsPromises);
       // console.log(cartItems)
 
-      res.render("userCart", { cart: cartItems });
+      const currentDate = new Date()
+      const coupons= await Coupon.find({isActive:true,  expirationDate: { $gt: currentDate }});
+
+      
+
+      res.render("userCart", { cart: cartItems,coupons });
     } catch (error) {
       console.log(error.message);
     }
@@ -194,11 +202,12 @@ module.exports = {
   getCheckout: async (req, res) => {
     try {
       const userId = req.session.user_id;
+      const { discountPrice, afterDiscount } = req.session;
       const userCart = await Cart.findOne({ userId });
 
       const cartProducts = userCart.products;
       console.log(cartProducts);
-      let cartTotal = 0;
+      let cartSubTotal = 0;
       // Fetch product details for each product in the cart
       const productsPromises = cartProducts.map(async (cartProduct) => {
         const productId = cartProduct.item;
@@ -206,7 +215,7 @@ module.exports = {
         if(productDetails.totalQty < cartProduct.quantity){
           res.redirect('/user-cart')
         }
-        cartTotal += productDetails.price * cartProduct.quantity;
+        cartSubTotal += productDetails.price * cartProduct.quantity;
         return { item: productDetails, quantity: cartProduct.quantity };
       });
 
@@ -216,7 +225,16 @@ module.exports = {
       const address = await Address.find({ userId });
       console.log(cartItems);
 
-      res.render("checkout", { products: cartItems, address, cartTotal });
+      let cartTotal=cartSubTotal;
+      if(afterDiscount){
+        cartTotal=afterDiscount
+      }
+
+      req.session.discountPrice = false;
+      req.session.afterDiscount = false;
+      req.session.couponCode = false;
+
+      res.render("checkout", { products: cartItems, address, cartTotal, cartSubTotal, discountPrice, afterDiscount });
     } catch (error) {
       console.log(error.message);
     }
@@ -349,7 +367,8 @@ module.exports = {
         },
       ]);
 
-      const totalPrice = cartTotal[0].total;
+      // const totalPrice = cartTotal[0].total;
+      const totalPrice=parseFloat(req.body.totalPrice)
       const orderId=generateRandomString()
       const orderData = new Order({
         orderId:orderId ,
@@ -469,6 +488,50 @@ module.exports = {
     } catch (error) {
         console.log(error.message)
     }
+  },
+
+
+//Coupon_Apply
+applyCoupon: async (req,res)=>{
+  try {
+    const {couponCode}=req.body;
+    const cartTotal= parseFloat(req.body.cartTotal);
+    console.log(cartTotal)
+    const coupon = await Coupon.findOne({code:couponCode,isActive:true});
+    const currentDate= new Date()
+    if(!coupon){
+      res.json({ error: 'Invalid coupon code' });
+    }
+    if(currentDate > coupon.expirationDate){
+      res.json({ error: 'This coupon has expired' });
+    }
+    if(cartTotal<coupon.minAmount){
+      res.json({ error: 'Cart total does not meet the minimum total amount' });
+    }
+    const discountAmount = (coupon.discountPercentage/100)*cartTotal;
+    let couponSaving=0;
+    if(discountAmount> coupon.maxDiscount){
+      couponSaving = Math.floor(coupon.maxDiscount)
+    }else{
+      couponSaving= Math.floor(discountAmount)
+    }
+    const newTotal= Math.floor(cartTotal- couponSaving)
+    req.session.discountPrice = couponSaving;
+    req.session.afterDiscount = newTotal;
+    req.session.couponCode = couponCode;
+
+    res.json({ offer: couponSaving, total: newTotal, success: 'Coupon applied' })
+
+  } catch (error) {
+    
   }
+},
+
+
+
+
 };
+
+
+
  

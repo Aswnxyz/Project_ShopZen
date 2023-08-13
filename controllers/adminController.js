@@ -4,6 +4,8 @@ const Order = require("../models/Orders");
 const Products = require("../models/Products");
 const bcrypt = require("bcrypt");
 const { captureRejectionSymbol } = require("nodemailer/lib/xoauth2");
+const Category = require("../models/Category");
+const Coupon = require("../models/Coupons");
 // const { default: products } = require('razorpay/dist/types/products');
 
 const dashBoard = async (req, res) => {
@@ -48,24 +50,26 @@ const dashBoard = async (req, res) => {
       {
         $group: {
           _id: "$name",
-          firstProduct: { $first: "$$ROOT" }
-        }
+          firstProduct: { $first: "$$ROOT" },
+        },
       },
       {
-        $replaceRoot: { newRoot: "$firstProduct" }
-      }
+        $replaceRoot: { newRoot: "$firstProduct" },
+      },
     ]);
-    const products= productsData.length;
+    const products = productsData.length;
 
     console.log(`Total products: ${products}`);
-    const totalSales = monthlySales[0] ? monthlySales[monthlySales.length-1].totalSales : 0;
-    console.log('total sales :::',totalSales)
+    const totalSales = monthlySales[0]
+      ? monthlySales[monthlySales.length - 1].totalSales
+      : 0;
+    console.log("total sales :::", totalSales);
     // getting details sales graph
     const pipeline = [
       {
-        $match:{
-          orderStatus:'recieved'
-        }
+        $match: {
+          orderStatus: "recieved",
+        },
       },
       {
         $group: {
@@ -108,11 +112,11 @@ const dashBoard = async (req, res) => {
       {
         $group: {
           _id: "$name",
-          firstProduct: { $first: "$$ROOT" }
-        }
+          firstProduct: { $first: "$$ROOT" },
+        },
       },
       {
-        $replaceRoot: { newRoot: "$firstProduct" }
+        $replaceRoot: { newRoot: "$firstProduct" },
       },
       {
         $group: {
@@ -126,7 +130,7 @@ const dashBoard = async (req, res) => {
         },
       },
     ]);
-    console.log('RESULT' ,result);
+    console.log("RESULT", result);
     const categoryWise = {};
     result.forEach((item) => {
       categoryWise[item._id] = item.count;
@@ -211,19 +215,16 @@ const dateWiseReport = async (req, res) => {
     console.log("Bodyy:::", req.body);
     // const fromDate = new Date(req.body.fromDate);
     // const toDate = new Date(req.body.toDate);
-    // toDate.setDate(toDate.getDate() + 1); 
+    // toDate.setDate(toDate.getDate() + 1);
 
-
-
-    
     let fromDate = req.body.fromDate ? new Date(req.body.fromDate) : new Date();
     let toDate = req.body.toDate ? new Date(req.body.toDate) : new Date();
-    if(req.body.toDate){
-        toDate.setDate(toDate.getDate() + 1); 
+    if (req.body.toDate) {
+      toDate.setDate(toDate.getDate() + 1);
     }
     let reportType;
     if (!req.body.fromDate && !req.body.toDate) {
-       reportType = req.body.timePeriod;
+      reportType = req.body.timePeriod;
 
       if (reportType === "daily") {
         // For daily, use the current day
@@ -245,13 +246,11 @@ const dateWiseReport = async (req, res) => {
       }
 
       toDate.setHours(23, 59, 59, 999);
-    }else{
-      reportType=req.body.fromDate+" to "+req.body.toDate
+    } else {
+      reportType = req.body.fromDate + " to " + req.body.toDate;
     }
 
-
-
-// --------------------------------------------------------
+    // --------------------------------------------------------
 
     // const fromDate = new Date(req.body.fromDate)
     // let toDate = new Date(req.body.toDate);
@@ -296,10 +295,16 @@ const dateWiseReport = async (req, res) => {
     ]);
     const dateWise = JSON.parse(JSON.stringify(report));
     console.log("Datewise ;", dateWise);
-    const totalRevenueSum = dateWise.reduce((acc, entry) => acc + entry.totalRevenue, 0);
-    const totalOrdersSum = dateWise.reduce((acc, entry) => acc + entry.totalOrders, 0);
-    console.log('totalRevenue ::',totalRevenueSum)
-    console.log('totalOrders ::',totalOrdersSum)
+    const totalRevenueSum = dateWise.reduce(
+      (acc, entry) => acc + entry.totalRevenue,
+      0
+    );
+    const totalOrdersSum = dateWise.reduce(
+      (acc, entry) => acc + entry.totalOrders,
+      0
+    );
+    console.log("totalRevenue ::", totalRevenueSum);
+    console.log("totalOrders ::", totalOrdersSum);
 
     const monthlySales = await Order.aggregate([
       {
@@ -327,7 +332,7 @@ const dateWiseReport = async (req, res) => {
         },
       },
     ]);
-    console.log('monthly:',monthlySales);
+    console.log("monthly:", monthlySales);
     const users = await Customer.countDocuments();
     console.log(users);
     const totalOrders = await Order.aggregate([
@@ -358,7 +363,7 @@ const dateWiseReport = async (req, res) => {
       products,
       reportType,
       totalRevenueSum,
-      totalOrdersSum
+      totalOrdersSum,
     });
   } catch (error) {
     console.log(error.message);
@@ -463,7 +468,9 @@ const getUserOrders = async (req, res) => {
     }
     const page = parseInt(req.query.page) || 1;
     const perPage = 10;
-    const totalOrders = await Order.find({paymentStatus: { $ne: "processing" }}).count()
+    const totalOrders = await Order.find({
+      paymentStatus: { $ne: "processing" },
+    }).count();
     const totalPages = Math.ceil(totalOrders / perPage);
 
     let search = "";
@@ -551,19 +558,19 @@ const changeOrderStatus = async (req, res) => {
   try {
     const { orderId, newStatus } = req.body;
 
-    const orderData= await Order.findOne({_id:new ObjectId(orderId)});
-    if(orderData.paymentStatus === "pending"){
+    const orderData = await Order.findOne({ _id: new ObjectId(orderId) });
+    if (orderData.paymentStatus === "pending") {
       await Order.updateOne(
         { _id: new ObjectId(orderId) },
-        { $set: { orderStatus: newStatus , paymentStatus:"completed"} }
+        { $set: { orderStatus: newStatus, paymentStatus: "completed" } }
       );
-    }else{
+    } else {
       await Order.updateOne(
         { _id: new ObjectId(orderId) },
         { $set: { orderStatus: newStatus } }
       );
     }
-   
+
     req.session.successMessage = ` Order Status Changed to ${newStatus} `;
 
     const products = await Order.aggregate([
@@ -592,6 +599,54 @@ const changeOrderStatus = async (req, res) => {
   }
 };
 
+//Get_Coupon
+const getCoupon = async (req, res) => {
+  try {
+    const data = await Coupon.find({isActive:true}).lean();
+    const coupons = data.reverse();
+    res.render("coupons", { admin: true, coupons });
+  } catch (error) {
+    console.log(error.message);
+  }
+};
+
+const postCoupon = async (req, res) => {
+  try {
+    const data = await Coupon.findOne({code:req.body.code,isActive:false});
+    if(data){
+      data.isActive=true;
+      await data.save();
+    }else{
+      const newCoupon = new Coupon({
+        code: req.body.code,
+        discountPercentage: req.body.discountPercentage,
+        maxDiscount: req.body.maxDiscountAmount,
+        minAmount: req.body.minAmount,
+        description: req.body.description,
+        expirationDate: req.body.expirationDate,
+      });
+      newCoupon.save();
+    }
+   
+    res.status(200).json({ status: true });
+  } catch (error) {
+    console.log(error.message);
+  }
+};
+
+const deleteCoupon = async (req, res) => {
+  try {
+    const { couponId } = req.body;
+    await Coupon.updateOne(
+      {_id:couponId},
+      {$set:{isActive:false}}
+      );
+      res.status(200).json({status:true})
+  } catch (error) {
+    console.log(error.message);
+  }
+};
+
 module.exports = {
   loginLoad,
   verifyLogin,
@@ -605,4 +660,7 @@ module.exports = {
   changeOrderStatus,
   getReport,
   dateWiseReport,
+  getCoupon,
+  postCoupon,
+  deleteCoupon,
 };

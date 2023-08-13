@@ -79,9 +79,18 @@ userRoute.get('/order-details',sessionHandling.checkingUser,userController.Order
 userRoute.post("/cancel-order",userController.cancelOrder)
 //Return_Order
 userRoute.post("/return-order",userController.returnOrder);
+//Apply_Coupon
+userRoute.post('/apply-coupon',cartController.applyCoupon)
+
+
+
+
+
+
+
+
+
 // userRoute.get("*",(req,res)=> res.status(404).render('page-404'))
-
-
 userRoute.get("/error",userController.error);
 
 module.exports= userRoute

@@ -73,11 +73,11 @@
                     </div>
                     <% if(cart[i].item.totalQty < 8 ) { %>
                     <span>Only <%=cart[i].item.totalQty%> left</span>
+                    <% } %> <% }else { %>
+                    <span id="outOfStock" class="text-danger"
+                      >Out Of Stock</span
+                    >
                     <% } %>
-                    <% }else { %>
-                      <span id="outOfStock" class="text-danger">Out Of Stock</span>
-                      <% } %>
-
                   </td>
 
                   <td
@@ -125,17 +125,26 @@
                 <div class="total-amount">
                   <div class="left">
                     <div class="coupon">
-                      <form action="#" target="_blank">
+                      <form id="apply-coupon-form" action="#" target="_blank">
                         <div class="form-row row justify-content-center">
                           <div class="form-group col-lg-6">
                             <input
                               class="font-medium"
-                              name="Coupon"
+                              name="couponCode"
+                              id="coupon-code-input"
                               placeholder="Enter Your Coupon"
                             />
+                            <span
+                              class="text-danger"
+                              id="coupon-error-message"
+                            ></span>
+                            <span
+                              class="text-success"
+                              id="coupon-success-message"
+                            ></span>
                           </div>
                           <div class="form-group col-lg-6">
-                            <button class="btn btn-sm">
+                            <button class="btn btn-sm" id="apply-coupon-button">
                               <i class="fi-rs-label mr-10"></i>Apply
                             </button>
                           </div>
@@ -145,7 +154,49 @@
                   </div>
                 </div>
               </div>
+              <div class="col-lg-6 col-md-12">
+                <div class="mb-30">
+                  <div class="heading_s1 mb-3">
+                    <h5>Applicable Coupons</h5>
+                  </div>
+                  <div>
+                    <div class="card">
+                      <div class="card-body">
+                        <% coupons.forEach((coupon)=>{ %>
+                        
+                        <ul>
+                          <li
+                            class="list-group-item d-flex justify-content-between align-items-center"
+                          >
+                            <h4 class="mb-0">
+                              <a href="#"><%= coupon.code %></a>
+                            </h4>
+                            <a
+                              class="copy-code-btn"
+                              data-clipboard-text="<%= coupon.code %>"
+                            >
+                              <i
+                                class="fa-regular fa-copy"
+                                style="color: #000000"
+                              ></i>
+                            </a>
+                          </li>
+                          <!-- <p><%=coupon.discountPercentage%>% discount</p> -->
+                          <span><%=coupon.description%></span>
+                          <p>Valid till: <%=coupon.expirationDate.toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric', weekday: 'long' })%></p>
+                          <!-- <p>Valid till: {{formatDate endDate}}</p> -->
+
+                          <hr />
+                        </ul>
+                        
+                        <% }); %>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
+
             <div class="col-lg-6 col-md-12">
               <div class="border p-md-4 p-30 border-radius cart-totals">
                 <div class="heading_s1 mb-3">
@@ -165,8 +216,22 @@
                       </tr>
                       <tr>
                         <td class="cart_total_label">Shipping</td>
-                        <td class="cart_total_amount">
+                        <td class="cart_shippinFee">
                           <i class="ti-gift mr-5"></i> Free Shipping
+                        </td>
+                      </tr>
+                      <tr>
+                        <td class="cart_total_label">Discount</td>
+                        <td class="cart_discount">
+                          <i class="ti-gift mr-5"></i
+                          ><span id="offer-total">₹0.00</span>
+                        </td>
+                      </tr>
+                      <tr class="coupon_discount d-none">
+                        <td class="cart_total_label">Coupon savings</td>
+                        <td class="cart_discount">
+                          <i class="ti-gift mr-5"></i
+                          ><span id="coupon-offer-total">₹0.00</span>
                         </td>
                       </tr>
                       <tr>
@@ -184,7 +249,7 @@
                     </tbody>
                   </table>
                 </div>
-                <a href="/user-checkout" class="btn btn-proceed-to-checkout" >
+                <a href="/user-checkout" class="btn btn-proceed-to-checkout">
                   <i class="fi-rs-box-alt mr-10"></i> Proceed To CheckOut</a
                 >
               </div>
@@ -232,6 +297,7 @@
 <!-- Add jQuery library to your HTML if not already added -->
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.0.19/dist/sweetalert2.all.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.8/clipboard.min.js"></script>
 
 <script>
   function deleteItem(itemId) {
@@ -296,6 +362,25 @@
     }
 </script> -->
 
+<!-- Copy-To-Clipboard -->
+<script>
+  var copyCodeBtns = document.querySelectorAll(".copy-code-btn");
+  var clipboard = new ClipboardJS(copyCodeBtns);
+  clipboard.on("success", function (e) {
+    var originalText = e.trigger.innerHTML; // Save the original HTML content
+    e.trigger.innerHTML = "Copied!";
+
+    setTimeout(function () {
+      e.trigger.innerHTML = originalText; // Restore the original HTML content
+    }, 2000);
+  });
+
+  clipboard.on("error", function (e) {
+    console.error("Error copying coupon code: ", e);
+  });
+</script>
+
+<!-- Calculate_Total -->
 <script>
   function calculateCartTotal() {
     // Get all the cart subtotal elements
@@ -313,6 +398,8 @@
     // Update the cart total on the page
     document.getElementById("cartSubTotal").innerHTML = "&#8377; " + cartTotal;
     document.getElementById("cartTotal").innerHTML = "&#8377; " + cartTotal;
+
+   
   }
 
   //Change_Cart_Quantity
@@ -386,65 +473,95 @@
   });
 </script>
 
-
-
-<!-- Any Product Is Out Of Stock That Time Chekout Button Will Be Disable  -->
-<!-- <script>
-// Get the "Proceed to Checkout" button element
-const checkoutButton = document.querySelector(".btn-proceed-to-checkout");
-
-// Function to check if any product is out of stock
-function checkStockStatus(cartItems) {
-  for (const item of cartItems) {
-    if (item.item.totalQty === 0) {
-      return true; // Out of stock item found
-    }
-  }
-  return false; // No out of stock items
-}
-
-// Function to update "Proceed to Checkout" button status
-function updateCheckoutButtonStatus() {
-  
-  const cartItems = <%- JSON.stringify(cart) %>; // Replace with your cart data
-  console.log(cartItems)
-  const isAnyOutOfStock = checkStockStatus(cartItems);
-
-  if (isAnyOutOfStock) {
-    checkoutButton.style.pointerEvents = 'none'
-    checkoutButton.style.opacity = '0.5'; 
-  } else {
-    checkoutButton.style= ''
-  }
-}
-
-// Call the function to update the button status when the page loads
-document.addEventListener("DOMContentLoaded", updateCheckoutButtonStatus);
-
-
-</script> -->
-
-
 <script>
-  const outOfStockSpan = document.getElementById('outOfStock');
+  const outOfStockSpan = document.getElementById("outOfStock");
   const checkoutButton = document.querySelector(".btn-proceed-to-checkout");
 
-  if(outOfStockSpan){
-    checkoutButton.removeAttribute("href")
-    checkoutButton.style.opacity = '0.5'; 
+  if (outOfStockSpan) {
+    checkoutButton.removeAttribute("href");
+    checkoutButton.style.opacity = "0.5";
   }
-  
 
-  checkoutButton.addEventListener('click', function() {
-  if(outOfStockSpan){
-    Toastify({
-        text: 'Remove unavailable items !',
+  checkoutButton.addEventListener("click", function () {
+    if (outOfStockSpan) {
+      Toastify({
+        text: "Remove unavailable items !",
         duration: 3000,
-        backgroundColor: '#ff0000',
-        gravity: 'center', // Display the toast at the top of the screen
-        position: 'right', // Center the toast horizontally
+        backgroundColor: "#ff0000",
+        gravity: "center", // Display the toast at the top of the screen
+        position: "right", // Center the toast horizontally
         stopOnFocus: true,
       }).showToast();
-  }
+    }
+  });
+</script>
+
+<!-- Apply_Coupon -->
+<script>
+    $(document).ready(function () {
+        $("#apply-coupon-form").submit(function (event) {
+            console.log('apply-coupon')
+            event.preventDefault();
+            var couponCode = $("#coupon-code-input").val();
+
+            const subtotalElements = document.querySelectorAll(".subtotal span");
+            let cartTotal = 0;
+            // Loop through all the subtotals and calculate the total
+            for (let i = 0; i < subtotalElements.length; i++) {
+              const subtotal = parseFloat(subtotalElements[i].textContent);
+              if (!isNaN(subtotal)) {
+                cartTotal += subtotal;
+              }
+            }
+            var cartDiscountRow = document.querySelector('.coupon_discount');
+
+            $.ajax({
+                type: "POST",
+                url: "/apply-coupon",
+                data: {
+                    couponCode: couponCode,
+                    cartTotal:cartTotal
+                },
+                success: function (response) {
+                    if (response.error) {
+                        $("#coupon-error-message").text(response.error);
+                        $("#coupon-success-message").text("");
+                        // $("#amount-to-pay").text(response.total);
+                    } else if (response.success) {
+                        $("#coupon-success-message").text(response.success);
+                        $("#coupon-error-message").text("");
+                        // $("#amount-to-pay").text(response.total);
+                        $("#cartTotal").text("₹"+response.total);
+                        cartDiscountRow.classList.remove('d-none');
+                        $("#coupon-offer-total").text(response.offer);
+                        $("#apply-coupon-button").prop("disabled", true).text("Applied");
+                        // add remove button
+                        const removeButton = $('<button>', {
+                            text: 'Remove coupon',
+                            click: function () {
+                                location.reload();
+                            }
+                        });
+                        removeButton.css({
+                            'background-color': '#F44336',
+                            'border': 'none',
+                            'color': 'white',
+                            'padding': '10px',
+                            'text-align': 'center',
+                            'text-decoration': 'none',
+                            'display': 'inline-block',
+                            'font-size': '16px',
+                            'margin-top': '10px',
+                            'cursor': 'pointer',
+                            'border-radius': '5px'
+                        });
+                        $("#apply-coupon-form").append(removeButton);
+                    }
+                },
+                error: function (xhr, status, error) {
+                    console.error(error);
+                }
+            });
+        });
     });
 </script>
