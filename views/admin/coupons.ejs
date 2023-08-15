@@ -85,6 +85,7 @@
                     <th class="text-center">Code</th>
                     <th class="text-center">Offer Percentage</th>
                     <th class="text-center">Description</th>
+                    <th class="text-center">ExpiredBy</th>
                     <th class="text-center">Action</th>
                   </tr>
                 </thead>
@@ -103,10 +104,24 @@
                     <td class="text-center">
                       <%=coupon.description%>
                     </td>
+                    <td>
+                      <%=coupon.expirationDate.toLocaleDateString('en-GB',
+                      { day: '2-digit', month: '2-digit', year: 'numeric',
+                      weekday: 'long' })%>
+                    </td>
                     <td class="text-center">
                       <a id="deleteCoupon" href="#" onclick="deleteCoupon('<%=coupon._id%>')" class="btn btn-sm btn-light font-sm rounded"
                         >Delete</a
                       >
+                      <% if (coupon.isActive) { %>
+                      <a id="deleteCoupon" href="/admin/block-coupon?id=<%=coupon._id%>" style="background-color: rgb(195, 4, 11);" class="btn btn-sm btn-light font-sm rounded"
+                        >Block</a
+                      >
+                      <% } else{ %>
+                        <a id="deleteCoupon" href="/admin/block-coupon?id=<%=coupon._id%>" style="background-color:green;" class="btn btn-sm btn-light font-sm rounded"
+                          >Unblock</a
+                        >
+                        <% } %>
                     </td>
                   </tr>
                   <% }); %>

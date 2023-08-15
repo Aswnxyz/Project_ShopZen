@@ -226,12 +226,12 @@
                                         </tr>
                                         {{else}} -->
                     <% if (discountPrice) { %>
-                      <tr>
-                        <th>Coupon savings</th>
-                        <td class="coupon-savings" colspan="2">
-                          &#8377; <%=discountPrice%>
-                        </td>
-                      </tr>
+                    <tr>
+                      <th>Coupon savings</th>
+                      <td class="coupon-savings" colspan="2">
+                        &#8377; <%=discountPrice%>
+                      </td>
+                    </tr>
                     <tr>
                       <th>Total</th>
                       <td colspan="2" class="product-subtotal">
@@ -250,7 +250,25 @@
                       </td>
                     </tr>
                     <% } %>
-                    <input type="hidden" name="totalPrice" value="<%=cartTotal%>">
+
+                    <input
+                      type="hidden"
+                      name="totalPrice"
+                      value="<%=cartTotal%>"
+                    />
+                    <% if (discountPrice) { %>
+                    <input
+                      type="hidden"
+                      name="couponSaving"
+                      value="<%=discountPrice%>"
+                    />
+                    <input
+                      type="hidden"
+                      name="couponCode"
+                      value="<%=couponCode%>"
+                    />
+                    <% } %>
+
                     <!-- {{/if}} -->
                   </tbody>
                 </table>
@@ -316,7 +334,7 @@
                       >Wallet</label
                     >
                   </div>
-                  <div class="custome-radio">
+                  <!-- <div class="custome-radio">
                     <input
                       class="form-check-input"
                       required=""
@@ -334,7 +352,7 @@
                       aria-controls="paypal"
                       >Paypal</label
                     >
-                  </div>
+                  </div> -->
                 </div>
               </div>
               <button class="btn btn-fill-out btn-block mt-30" type="submit">
@@ -361,59 +379,129 @@
       // Serialize the form data
       var formData = $(this).serialize();
 
-      // Perform the AJAX request
-      $.ajax({
-        url: $(this).attr("action"),
-        type: $(this).attr("method"),
-        data: formData,
-        success: function (response) {
-          // Handle the success response from the server
-          switch (response.paymentOption) {
-            case "COD":
-              Swal.fire({
-                title: "Thank You!",
-                text: "Your order has been placed successfully.",
-                icon: "success",
-                confirmButtonText: "OK",
-              }).then((result) => {
-                if (result.isConfirmed) {
-                  // Load a new page or redirect to a different URL after the user clicks "OK"
-                  window.location.href = "/landing-page"; // Replace with your desired URL
+      Swal.fire({
+        title: "Are you sure?",
+        text: "You are about to place an order. Continue?",
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonColor: "#3085d6",
+        cancelButtonColor: "#d33",
+        confirmButtonText: "Yes, Continue!",
+      }).then((result) => {
+        if (result.isConfirmed) {
+          let payment_method = $("input[name=payment_option]:checked").val();
+          console.log(payment_method);
+
+          if (payment_method === "Wallet") {
+            $.ajax({
+              method: "POST",
+              url: "/get-wallet-details",
+              data: formData,
+              success: (response) => {
+                console.log("res", response);
+                if (response.walletTotal < response.cartTotal) {
+                  Swal.fire({
+                    title: "Insufficient Balance",
+                    text: "You do not have enough balance in your wallet to complete the transaction.",
+                    icon: "error",
+                  });
+                } else {
+                  Swal.fire({
+                    title: "Confirm Wallet Payment",
+                    text: `You have ₹ ${response.walletTotal} in your wallet. Continue?`,
+                    icon: "warning",
+                    buttons: true,
+                    dangerMode: true,
+                  }).then((confirm) => {
+                    if (confirm) {
+                      placeOrder();
+                    }
+                  });
                 }
-              });
-              break;
-            case "Razorpay":
-              razorpayPayment(response.order);
-
-              break;
-          }
-
-          // You can update the UI or redirect the user here
-        },
-        error: function (xhr, status, error) {
-          // Handle errors
-          var jsonResponse = JSON.parse(xhr.responseText);
-          if (jsonResponse.err) {
-            Swal.fire("The Address?", "That thing is still there?", "question");
-            // You can display the error message to the user or perform other actions
-          } else if (jsonResponse.paymentFailed) {
-            Swal.fire({
-              icon: "error",
-              title: "Payment Failed !",
-              text: "Something went wrong!",
-              footer: '<a href="">Why do I have this issue?</a>',
-            }).then(() => {
-              location.replace("/");
+              },
+              error: (response, stat, err) => {
+                console.log(response);
+              },
             });
+          } else {
+            placeOrder();
           }
-          console.error("Error placing order: " + error);
-          // Display an error message to the user
-        },
+        }
       });
+
+      // Perform the AJAX request
+      function placeOrder() {
+        $.ajax({
+          url: "/place-order",
+          type: "post",
+          data:  formData,
+          success: function (response) {
+            // Handle the success response from the server
+            switch (response.paymentOption) {
+              case "COD":
+                Swal.fire({
+                  title: "Thank You!",
+                  text: "Your order has been placed successfully.",
+                  icon: "success",
+                  confirmButtonText: "OK",
+                }).then((result) => {
+                  if (result.isConfirmed) {
+                    // Load a new page or redirect to a different URL after the user clicks "OK"
+                    window.location.href = "/landing-page"; // Replace with your desired URL
+                  }
+                });
+                break;
+              case "Razorpay":
+                razorpayPayment(response.order,response.couponCode);
+
+                break;
+
+              case "Wallet":
+                Swal.fire({
+                  title: "Thank You!",
+                  text: "Your order has been placed successfully.",
+                  icon: "success",
+                  confirmButtonText: "OK",
+                }).then((result) => {
+                  if (result.isConfirmed) {
+                    // Load a new page or redirect to a different URL after the user clicks "OK"
+                    window.location.href = "/landing-page"; // Replace with your desired URL
+                  }
+                });
+                break;
+            }
+
+            // You can update the UI or redirect the user here
+          },
+          error: function (xhr, status, error) {
+            // Handle errors
+            var jsonResponse = JSON.parse(xhr.responseText);
+            if (jsonResponse.err) {
+              Swal.fire(
+                "The Address?",
+                "That thing is still there?",
+                "question"
+              );
+              // You can display the error message to the user or perform other actions
+            } else if (jsonResponse.paymentFailed) {
+              Swal.fire({
+                icon: "error",
+                title: "Payment Failed !",
+                text: "Something went wrong!",
+                footer: '<a href="">Why do I have this issue?</a>',
+              }).then(() => {
+                location.replace("/");
+              });
+            }
+            console.error("Error placing order: " + error);
+            // Display an error message to the user
+          },
+        });
+      }
     });
   });
 
-  function razorpayPayment(order) {
+  function razorpayPayment(order,couponCode) {
     var options = {
       key: "rzp_test_SfiHz94Pmnimk2", // Enter the Key ID generated from the Dashboard
       amount: order.amount, // Amount is in currency subunits. Default currency is INR. Hence, 50000 refers to 50000 paise
@@ -427,7 +515,7 @@
         // alert(response.razorpay_payment_id);
         // alert(response.razorpay_order_id);
         // alert(response.razorpay_signature);
-        verifyPayment(response, order);
+        verifyPayment(response, order,couponCode);
       },
       prefill: {
         name: "Gaurav Kumar",
@@ -468,12 +556,13 @@
     rzp1.open();
   }
 
-  function verifyPayment(payment, order) {
+  function verifyPayment(payment, order,couponCode) {
     $.ajax({
       url: "/verify-payment",
       data: {
         payment,
         order,
+        couponCode
       },
       method: "post",
       success: (response) => {

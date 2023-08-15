@@ -2,6 +2,7 @@ const Customer = require("../models/Customer");
 const UserOTPVerification = require("../models/UserOTPVerification");
 const nodemailer = require("nodemailer");
 const bcrypt = require("bcrypt");
+const fs = require("fs")
 const Category = require("../models/Category");
 const Products = require("../models/Products");
 const Orders = require("../models/Orders");
@@ -10,11 +11,12 @@ const Cart = require("../models/Cart");
 const { query } = require("express");
 const { ObjectId } = require("mongodb");
 const { json } = require("body-parser");
-
+const generateReport = require("../public/assets/js/generate-report");
+const Wallet = require("../models/Wallet");
 
 const getHome = async (req, res) => {
   try {
-    console.log(process.env.SHOPZEN_EMAIL)
+    console.log(process.env.SHOPZEN_EMAIL);
     const categories = await Category.find({});
     const successMessage = req.session.successMessage;
     if (successMessage) {
@@ -171,7 +173,7 @@ const verifyLogin = async (req, res) => {
   try {
     const email = req.body.email;
     const password = req.body.password;
-    const userData = await Customer.findOne({ email: email, is_active:true });
+    const userData = await Customer.findOne({ email: email, is_active: true });
     if (userData) {
       const passwordMatch = await bcrypt.compare(password, userData.password);
       if (passwordMatch) {
@@ -312,180 +314,171 @@ const userLogout = async (req, res) => {
 //   }
 // };
 
-
 //Search_Products
-const productSearch=async (req,res)=>{
+const productSearch = async (req, res) => {
   try {
+    const search = req.query.search;
 
-  
-      const search=req.query.search
-    
-      const data = await Products.aggregate([
-        {
-          $match: {
-            isActive: true,
-            $or: [
-              { name: { $regex: '.*' + search + '.*', $options: 'i' } },
-              { category: { $regex: '.*' + search + '.*', $options: 'i' } },
-              { subCategory: { $regex: '.*' + search + '.*', $options: 'i' } }
-            ]
-          }
+    const data = await Products.aggregate([
+      {
+        $match: {
+          isActive: true,
+          $or: [
+            { name: { $regex: ".*" + search + ".*", $options: "i" } },
+            { category: { $regex: ".*" + search + ".*", $options: "i" } },
+            { subCategory: { $regex: ".*" + search + ".*", $options: "i" } },
+          ],
         },
-        {
-          $group: {
-            _id: "$name",
-            firstProduct: { $first: "$$ROOT" }
-          }
+      },
+      {
+        $group: {
+          _id: "$name",
+          firstProduct: { $first: "$$ROOT" },
         },
-        {
-          $replaceRoot: { newRoot: "$firstProduct" }
-        }
-      ]);
-      
-    if (!data.length){
-      res.render('no-products-found')
-    }else{
-      const uniqueCategoryNames = [...new Set(data.map(item => item.category))];
+      },
+      {
+        $replaceRoot: { newRoot: "$firstProduct" },
+      },
+    ]);
+
+    if (!data.length) {
+      res.render("no-products-found");
+    } else {
+      const uniqueCategoryNames = [
+        ...new Set(data.map((item) => item.category)),
+      ];
 
       // Query categories based on the unique category names
-      const categoryList = await Category.find({ name: { $in: uniqueCategoryNames } });
-  
-      res.render("products", { data,categoryList });
+      const categoryList = await Category.find({
+        name: { $in: uniqueCategoryNames },
+      });
+
+      res.render("products", { data, categoryList });
     }
- 
-    
-  } catch (error) {
-    console.log(error.message)
-  }
-}
-
-//Get_Products
-const getProducts = async (req, res) => {
-  try {
-
-    const {sort}=req.query;
-    console.log(req.query)
-    console.log('BODY :::',req.body)
-    const priceLimit = req.body.price
-
-    const { category } = req.query;
-    const query = { category: category };
-    query.isActive=true;
-
-  let subCategory = '';
-  
-  if (req.query.subCategory) {
-    subCategory = req.query.subCategory;
-  }
-
-  let subCategories = [];
-
-  if (req.body.subCategory) {
-    if (Array.isArray(req.body.subCategory)) {
-      subCategories = req.body.subCategory;
-    } else {
-      subCategories = [req.body.subCategory];
-    }
-  }
-  
-  if (subCategories.length > 0) {
-    query.subCategory = { $in: subCategories };
-  }
-
-  
-  
-  // Construct the query object based on the presence of subCategory and filtered price
-  
-  if (subCategory) {
-    query.subCategory = subCategory;
-  }
-  
-  if(priceLimit){
-  // Step 1: Remove the currency symbol (₹) and any spaces
-  const sanitizedParams = priceLimit.replace(/₹|\s/g, '');
-  // Step 2: Split the sanitizedParams at the hyphen
-  const priceRange = sanitizedParams.split('-');
-  
-  // Step 3: Convert the resulting substrings into numbers
-  const minPrice = parseInt(priceRange[0], 10);
-  const maxPrice = parseInt(priceRange[1], 10);
-
-  query.price = { $gte: minPrice, $lte: maxPrice };
-
-  }
-  
-  console.log('query::', query)
-  // const data = await Products.find(query);
-
-  const page = parseInt(req.query.page) || 1;
-  const perPage = 8;
-
-  // Build the aggregation pipeline
-  const aggregationPipeline= [
-    {
-      $match: query
-    },
-    {
-      $group: {
-        _id: "$name",
-        firstProduct: { $first: "$$ROOT" }
-      }
-    },
-    {
-      $replaceRoot: { newRoot: "$firstProduct" }
-    }
-  ];
-
-  if (sort === 'hightToLow') {
-    aggregationPipeline.push({ $sort: { price: -1 } }); // Sort by price high to low
-  } else if (sort === 'lowToHigh') {
-    aggregationPipeline.push({ $sort: { price: 1 } }); // Sort by price low to high
-  }
-
-
-const data = await Products.aggregate(aggregationPipeline)
-const totalProducts= data.length;
-const totalPages = Math.ceil(totalProducts / perPage);
-
-
-  
-  if (data.length === 0) {
-    // Render the "No products found" page
-    if(req.xhr){
-      return res.json({data})
-
-    }
-    return res.render("no-products-found");
-  }
-
-  const categoryList= await Category.find({name:category});
-  // console.log('categoryList:',categoryList)
-  if(req.xhr){
-    return res.json({data, categoryList})
-  }
-  res.render("products", { data, categoryList });
-  
-   
   } catch (error) {
     console.log(error.message);
   }
 };
 
+//Get_Products
+const getProducts = async (req, res) => {
+  try {
+    const { sort } = req.query;
+    console.log(req.query);
+    console.log("BODY :::", req.body);
+    const priceLimit = req.body.price;
 
+    const { category } = req.query;
+    const query = { category: category };
+    query.isActive = true;
+
+    let subCategory = "";
+
+    if (req.query.subCategory) {
+      subCategory = req.query.subCategory;
+    }
+
+    let subCategories = [];
+
+    if (req.body.subCategory) {
+      if (Array.isArray(req.body.subCategory)) {
+        subCategories = req.body.subCategory;
+      } else {
+        subCategories = [req.body.subCategory];
+      }
+    }
+
+    if (subCategories.length > 0) {
+      query.subCategory = { $in: subCategories };
+    }
+
+    // Construct the query object based on the presence of subCategory and filtered price
+
+    if (subCategory) {
+      query.subCategory = subCategory;
+    }
+
+    if (priceLimit) {
+      // Step 1: Remove the currency symbol (₹) and any spaces
+      const sanitizedParams = priceLimit.replace(/₹|\s/g, "");
+      // Step 2: Split the sanitizedParams at the hyphen
+      const priceRange = sanitizedParams.split("-");
+
+      // Step 3: Convert the resulting substrings into numbers
+      const minPrice = parseInt(priceRange[0], 10);
+      const maxPrice = parseInt(priceRange[1], 10);
+
+      query.price = { $gte: minPrice, $lte: maxPrice };
+    }
+
+    console.log("query::", query);
+    // const data = await Products.find(query);
+
+    const page = parseInt(req.query.page) || 1;
+    const perPage = 8;
+
+    // Build the aggregation pipeline
+    const aggregationPipeline = [
+      {
+        $match: query,
+      },
+      {
+        $group: {
+          _id: "$name",
+          firstProduct: { $first: "$$ROOT" },
+        },
+      },
+      {
+        $replaceRoot: { newRoot: "$firstProduct" },
+      },
+    ];
+
+    if (sort === "hightToLow") {
+      aggregationPipeline.push({ $sort: { price: -1 } }); // Sort by price high to low
+    } else if (sort === "lowToHigh") {
+      aggregationPipeline.push({ $sort: { price: 1 } }); // Sort by price low to high
+    }
+
+    const data = await Products.aggregate(aggregationPipeline);
+    const totalProducts = data.length;
+    const totalPages = Math.ceil(totalProducts / perPage);
+
+    if (data.length === 0) {
+      // Render the "No products found" page
+      if (req.xhr) {
+        return res.json({ data });
+      }
+      return res.render("no-products-found");
+    }
+
+    const categoryList = await Category.find({ name: category });
+    // console.log('categoryList:',categoryList)
+    if (req.xhr) {
+      return res.json({ data, categoryList });
+    }
+    res.render("products", { data, categoryList });
+  } catch (error) {
+    console.log(error.message);
+  }
+};
 
 //View_Products
 const viewProduct = async (req, res) => {
   try {
-    console.log('rqueryyyyy',req.query)
-    let {id} = req.query;
+    console.log("rqueryyyyy", req.query);
+    let { id } = req.query;
     const product = await Products.findById({ _id: id });
-    console.log("PRODUCTTTTTTTTT:",product)
-    const wishlist= await Wishlist.findOne({userId:new ObjectId(req.session.user_id)});
-    console.log('wishlist::::', wishlist)
-    const data = await Products.find({name:product.name, totalQty: { $gte: 1 }},{_id:0,size:1})
-    const sizeData = data.map(sizeObj => sizeObj.size);
-    res.render("productDetails", { product, wishlist,sizeData });
-
+    console.log("PRODUCTTTTTTTTT:", product);
+    const wishlist = await Wishlist.findOne({
+      userId: new ObjectId(req.session.user_id),
+    });
+    console.log("wishlist::::", wishlist);
+    const data = await Products.find(
+      { name: product.name, totalQty: { $gte: 1 } },
+      { _id: 0, size: 1 }
+    );
+    const sizeData = data.map((sizeObj) => sizeObj.size);
+    res.render("productDetails", { product, wishlist, sizeData });
   } catch (error) {
     console.log(error.message);
   }
@@ -497,28 +490,34 @@ const getOrders = async (req, res) => {
     const userId = req.session.user_id;
     const page = parseInt(req.query.page) || 1;
     const perPage = 10;
-    const totalOrders = await Orders.find({userId:new ObjectId(userId), paymentStatus: { $ne: "processing" }}).count()
+    const totalOrders = await Orders.find({
+      userId: new ObjectId(userId),
+      paymentStatus: { $ne: "processing" },
+    }).count();
     const totalPages = Math.ceil(totalOrders / perPage);
 
     let search = "";
     if (req.query.orderId) {
-        search = req.query.orderId
+      search = req.query.orderId;
     }
 
     const orders = await Orders.find({
-       userId: new ObjectId(userId) ,
-       paymentStatus: { $ne: "processing" },
-       $or: [
-        { orderId: { $regex: '.*' + search + '.*', $options: 'i' } },   
-    ]
-      })
-    .sort({ createdAt: -1 }) // Assuming you want to sort by creation date in descending order
-    .skip((page - 1) * perPage)
-    .limit(perPage);
+      userId: new ObjectId(userId),
+      paymentStatus: { $ne: "processing" },
+      $or: [{ orderId: { $regex: ".*" + search + ".*", $options: "i" } }],
+    })
+      .sort({ createdAt: -1 }) // Assuming you want to sort by creation date in descending order
+      .skip((page - 1) * perPage)
+      .limit(perPage);
 
     const startingIndex = (page - 1) * perPage + 1;
-   
-    res.render("orders", { orders, totalPages, currentPage:page, startingIndex });
+
+    res.render("orders", {
+      orders,
+      totalPages,
+      currentPage: page,
+      startingIndex,
+    });
   } catch (error) {
     console.log(error.message);
   }
@@ -576,15 +575,76 @@ const cancelOrder = async (req, res) => {
       { $set: { orderStatus: newStatus } }
     );
 
-    const products= await Orders.aggregate([
-      {$match:{ orderId: orderId }},
-      {$unwind:'$products'},
-      {$project:{
-        item:'$products.item',
-        quantity:'$products.quantity'
-      }}
+    const products = await Orders.aggregate([
+      { $match: { orderId: orderId } },
+      { $unwind: "$products" },
+      {
+        $project: {
+          item: "$products.item",
+          quantity: "$products.quantity",
+        },
+      },
     ]);
-    console.log('PRODUCTS::::::',products);
+    console.log("PRODUCTS::::::", products);
+
+    for (let i = 0; i < products.length; i++) {
+      await Products.updateOne(
+        { _id: new ObjectId(products[i].item) },
+        { $inc: { totalQty: products[i].quantity } } // Corrected access to the quantity value
+      );
+    }
+    
+    const orderData= await Orders.findOne({orderId:orderId})
+  if(orderData.paymentMethod !== 'COD'){
+    const transObj={
+      orderId:orderId,
+      amount:orderData.totalPrice,
+      date: new Date(),
+      type:'credit'
+    }
+
+    const existingWallet = await Wallet.findOne({userId:new ObjectId(req.session.user_id)});
+    if(existingWallet){
+      existingWallet.transactions.push(transObj);
+      existingWallet.balance += orderData.totalPrice
+      await existingWallet.save()
+    }else{
+      const newWallet= new Wallet({
+        userId:new ObjectId(req.session.user_id),
+        balance:orderData.totalPrice,
+        transactions:[transObj]
+      })
+      await newWallet.save()
+    }
+  }
+
+    res.json({ res: true });
+  } catch (error) {
+    console.log(error.message);
+  }
+};
+
+//Return_Order
+const returnOrder = async (req, res) => {
+  try {
+    const { orderId } = req.body;
+    const newStatus = "returned";
+    await Orders.updateOne(
+      { orderId: orderId },
+      { $set: { orderStatus: newStatus } }
+    );
+
+    const products = await Orders.aggregate([
+      { $match: { orderId: orderId } },
+      { $unwind: "$products" },
+      {
+        $project: {
+          item: "$products.item",
+          quantity: "$products.quantity",
+        },
+      },
+    ]);
+    console.log("PRODUCTS::::::", products);
 
     for (let i = 0; i < products.length; i++) {
       await Products.updateOne(
@@ -599,43 +659,8 @@ const cancelOrder = async (req, res) => {
   }
 };
 
-
-//Return_Order
-const returnOrder=async (req,res)=>{
-  try {
-    const { orderId } = req.body;
-    const newStatus = "returned";
-    await Orders.updateOne(
-      { orderId: orderId },
-      { $set: { orderStatus: newStatus } }
-    );
-
-    const products= await Orders.aggregate([
-      {$match:{ orderId: orderId }},
-      {$unwind:'$products'},
-      {$project:{
-        item:'$products.item',
-        quantity:'$products.quantity'
-      }}
-    ]);
-    console.log('PRODUCTS::::::',products);
-
-    for (let i = 0; i < products.length; i++) {
-      await Products.updateOne(
-        { _id: new ObjectId(products[i].item) },
-        { $inc: { totalQty: products[i].quantity } } // Corrected access to the quantity value
-      );
-    }
-
-    res.json({ res: true });
-  } catch (error) {
-    console.log(error.message)
-  }
-
-}
-
 //Wishlist
-const getWishlist=async (req,res)=>{
+const getWishlist = async (req, res) => {
   try {
     const products = await Wishlist.aggregate([
       { $match: { userId: new ObjectId(req.session.user_id) } },
@@ -654,13 +679,13 @@ const getWishlist=async (req,res)=>{
                 name: 1,
                 images: 1,
                 price: 1,
-                description:1,
-                size:1
-              }
-            }
+                description: 1,
+                size: 1,
+              },
+            },
           ],
-          as: "product"
-        }
+          as: "product",
+        },
       },
       { $unwind: "$product" },
       {
@@ -672,86 +697,130 @@ const getWishlist=async (req,res)=>{
           images: "$product.images",
           price: "$product.price",
           description: "$product.description",
-          size:"$product.size"
-        }
-      }
+          size: "$product.size",
+        },
+      },
     ]);
-    console.log(products)
-    res.render('wishlist',{products})
+    console.log(products);
+    res.render("wishlist", { products });
   } catch (error) {
-    console.log(error.message)
+    console.log(error.message);
   }
-}
+};
 
 //Add_To_Wishlist
-const addToWishlist= async (req,res)=>{
+const addToWishlist = async (req, res) => {
   try {
-    console.log('coming on wishlist')
+    console.log("coming on wishlist");
 
-    const {productId}=req.query;
+    const { productId } = req.query;
     const userId = req.session.user_id;
-    const userData = await Wishlist.findOne({userId:new ObjectId(userId)});
-    if(userData){
-      if(userData.products.includes(productId)){
+    const userData = await Wishlist.findOne({ userId: new ObjectId(userId) });
+    if (userData) {
+      if (userData.products.includes(productId)) {
         await Wishlist.updateOne(
-          {userId:new ObjectId(userId)},
-          {$pull:{products:productId}}
+          { userId: new ObjectId(userId) },
+          { $pull: { products: productId } }
         );
-        const newWishlist = await Wishlist.findOne({userId:new ObjectId(userId)});
-        const wishlistLength=newWishlist.products.length;
-        res.json({status:false,wishlistLength})
-      }else{
-      userData.products.push(productId)
-      await userData.save();
-    const wishlistLength=userData.products.length;
-      res.json({status:true,wishlistLength})
+        const newWishlist = await Wishlist.findOne({
+          userId: new ObjectId(userId),
+        });
+        const wishlistLength = newWishlist.products.length;
+        res.json({ status: false, wishlistLength });
+      } else {
+        userData.products.push(productId);
+        await userData.save();
+        const wishlistLength = userData.products.length;
+        res.json({ status: true, wishlistLength });
       }
-
-
-    }else{
+    } else {
       const newWishlist = new Wishlist({
-        userId:userId,
-        products:[productId]
+        userId: userId,
+        products: [productId],
       });
       await newWishlist.save();
-      const wishlistLength=newWishlist.products.length;
-      res.json({status:true,wishlistLength})
+      const wishlistLength = newWishlist.products.length;
+      res.json({ status: true, wishlistLength });
     }
-
-
   } catch (error) {
-    console.log(error.message)
+    console.log(error.message);
   }
-}
+};
 
 //Delete_Wishlist
-const deleteWishlist= async (req,res)=>{
+const deleteWishlist = async (req, res) => {
   try {
-    const {productId}=req.body;
-    const userId= req.session.user_id
-    console.log('product id ::::',productId)
+    const { productId } = req.body;
+    const userId = req.session.user_id;
+    console.log("product id ::::", productId);
     await Wishlist.updateOne(
-      {userId:new ObjectId(userId)},
-      {$pull:{products:productId}}
+      { userId: new ObjectId(userId) },
+      { $pull: { products: productId } }
     );
-    const updatedWishlist= await Wishlist.findOne();
-    const wishlistLength=updatedWishlist.products.length;
-    res.json({ message: "Product deleted successfully" ,wishlistLength});
+    const updatedWishlist = await Wishlist.findOne();
+    const wishlistLength = updatedWishlist.products.length;
+    res.json({ message: "Product deleted successfully", wishlistLength });
   } catch (error) {
-    console.log(error.message)
+    console.log(error.message);
   }
-}
+};
 
-
-const error = async(req,res)=>{
+//Generate_Invoice
+const generateInvoice = async (req, res) => {
   try {
-    res.render('page-404')
+    const { orderId } = req.query;
+    const { format } = req.body;
+    if (!format) {
+      return res.status(400).send("Format field is required");
+    }
+    const orderdata = [];
+    const result = await Orders.findOne({ orderId: orderId });
+    if (result) {
+      orderdata.push(result);
+    } else {
+      console.log("Error calculating sales data:", err);
+      return res.status(500).send("Error calculating sales data");
+    }
+    const reportFile = await generateReport(format, orderdata);
+
+    let contentType, fileExtension;
+    if (format === "pdf") {
+      contentType = "application/pdf";
+      fileExtension = "pdf";
+    } else {
+      return res.status(400).send("Invalid format specified");
+    }
+    // Send the report back to the client and download it
+    res.setHeader('Content-Disposition', `attachment; filename=sales-report.${fileExtension}`);
+    res.setHeader('Content-Type', contentType);
+    const fileStream = fs.createReadStream(reportFile);
+    fileStream.pipe(res);
+    fileStream.on('end', () => {
+      console.log('File sent successfully!')
+      // Remove the file from the server
+      fs.unlink(reportFile, (err) => {
+         if (err) {
+            console.log('Error deleting file:', err);
+         } else {
+            console.log('File deleted successfully!');
+         }
+      })
+   })
+
+
+
+
+
   } catch (error) {
-    
+    console.log(error.message);
   }
-}
+};
 
-
+const error = async (req, res) => {
+  try {
+    res.render("page-404");
+  } catch (error) {}
+};
 
 module.exports = {
   getHome,
@@ -774,6 +843,6 @@ module.exports = {
   getWishlist,
   addToWishlist,
   deleteWishlist,
-  error
-  
+  generateInvoice,
+  error,
 };

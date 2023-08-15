@@ -75,12 +75,19 @@ userRoute.post('/verify-payment',cartController.verifyPayment)
 //User_Orders & Details
 userRoute.get('/orders',sessionHandling.checkingUser,userController.getOrders)
 userRoute.get('/order-details',sessionHandling.checkingUser,userController.OrderDetails);
+//User_Wallet
+userRoute.get('/user-wallet',sessionHandling.checkingUser,userProfileController.getWallet);
+userRoute.post('/get-wallet-details',userProfileController.getWalletDetails)
 //Cancel_Order
 userRoute.post("/cancel-order",userController.cancelOrder)
 //Return_Order
 userRoute.post("/return-order",userController.returnOrder);
 //Apply_Coupon
-userRoute.post('/apply-coupon',cartController.applyCoupon)
+userRoute.post('/apply-coupon',cartController.applyCoupon);
+//Remove_Coupon
+userRoute.get('/remove-coupon',sessionHandling.checkingUser,cartController.removeCoupon)
+//Generate_ Invoice 
+userRoute.post('/create-invoice',userController.generateInvoice)
 
 
 

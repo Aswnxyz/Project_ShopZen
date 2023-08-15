@@ -1,6 +1,10 @@
 const Address =require('../models/Address')
 const Customer =require('../models/Customer');
-const bcrypt= require('bcrypt')
+const Wallet =require('../models/Wallet');
+const Cart =require('../models/Cart');
+const bcrypt= require('bcrypt');
+const { cartCountMiddelware } = require('../middleware/cartCount');
+const { ObjectId } = require('mongodb');
 
 
 module.exports={
@@ -137,6 +141,96 @@ postEditProfile: async (req,res)=>{
         );
         console.log('here non issue')
             res.redirect(`/edit-profile?message=Profile Edited Successfully.`)
+
+    } catch (error) {
+        console.log(error.message)
+    }
+},
+
+//Get_User_Wallet
+getWallet: async (req,res)=>{
+    try {
+        const userId= req.session.user_id;
+        const wallet = await Wallet.findOne({userId:new ObjectId(userId)}).lean();
+        const transactions= wallet?.transactions.reverse()
+        console.log(transactions)
+        res.render('userWallet',{wallet,transactions})
+    } catch (error) {
+        console.log(error.message)
+    }
+},
+
+//Get_Wallet_details
+getWalletDetails: async (req,res)=>{
+    try {
+        let couponSaving;
+        if(req.body.couponSaving){
+            couponSaving=req.body.couponSaving
+        }
+        const userId = req.session.user_id
+        console.log(userId)
+        const wallet = await Wallet.find({userId:userId}).lean();
+        let walletTotal;
+        if(!wallet.length){
+            const newWallet = new Wallet({
+                userId: new ObjectId(userId),
+                balance: 0,
+                transactions: [] // Create new array with the new transaction
+              })
+              await newWallet.save();
+              walletTotal=0
+        }else{
+            walletTotal = wallet[0].balance
+        }
+       
+        
+
+        console.log('wallaert ', walletTotal)
+        const cartTotal = await Cart.aggregate([
+            {
+              $match: { userId: new ObjectId(userId) },
+            },
+            {
+              $unwind: "$products",
+            },
+            {
+              $project: {
+                item: { $toObjectId: "$products.item" },
+                quantity: "$products.quantity",
+              },
+            },
+            {
+              $lookup: {
+                from: "products",
+                localField: "item",
+                foreignField: "_id",
+                as: "product",
+              },
+            },
+            {
+              $project: {
+                item: 1,
+                quantity: 1,
+                product: { $arrayElemAt: ["$product", 0] },
+              },
+            },
+            {
+              $group: {
+                _id: null,
+                total: {
+                  $sum: {
+                    $multiply: [
+                      { $toDouble: "$quantity" },
+                      { $toDouble: "$product.price" },
+                    ],
+                  },
+                },
+              },
+            },
+          ]);
+          console.log(cartTotal)
+              const totalPrice = cartTotal[0].total
+              res.json({walletTotal,cartTotal:totalPrice})
 
     } catch (error) {
         console.log(error.message)

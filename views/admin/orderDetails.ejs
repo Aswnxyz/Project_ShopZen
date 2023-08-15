@@ -128,7 +128,11 @@
                                         <article class="float-end">
                                             <dl class="dlist">
                                                 <dt>Subtotal:</dt>
-                                                <dd>₹ <%=orderDetails[0].totalPrice%></dd>
+                                                <dd>₹ <%=orderDetails[0].totalPrice+orderDetails[0].couponSaving%></dd>
+                                            </dl>
+                                            <dl class="dlist">
+                                                <dt>Discount/Coupon:</dt>
+                                                <dd>₹ <%=orderDetails[0].couponSaving%></dd>
                                             </dl>
                                             <dl class="dlist">
                                                 <dt>Shipping cost:</dt>

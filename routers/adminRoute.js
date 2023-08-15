@@ -57,6 +57,8 @@ adminRoute.get('/coupons',sessionHandling.checkingAdmin,adminController.getCoupo
 adminRoute.post('/coupons',adminController.postCoupon)
 //Delte_Coupon
 adminRoute.post('/delete-coupon',adminController.deleteCoupon)
+//Block_Coupon
+adminRoute.get('/block-coupon',sessionHandling.checkingAdmin ,adminController.blockCoupon)
 
 
 

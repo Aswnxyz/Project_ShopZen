@@ -147,6 +147,12 @@
                             <button class="btn btn-sm" id="apply-coupon-button">
                               <i class="fi-rs-label mr-10"></i>Apply
                             </button>
+                            <span  id="removeCoupon" class="m-2 d-none"
+                              ><i
+                                class="fa-solid fa-trash"
+                                style="color: #ff0000"
+                              ></i
+                            ></span>
                           </div>
                         </div>
                       </form>
@@ -163,7 +169,7 @@
                     <div class="card">
                       <div class="card-body">
                         <% coupons.forEach((coupon)=>{ %>
-                        
+
                         <ul>
                           <li
                             class="list-group-item d-flex justify-content-between align-items-center"
@@ -183,12 +189,17 @@
                           </li>
                           <!-- <p><%=coupon.discountPercentage%>% discount</p> -->
                           <span><%=coupon.description%></span>
-                          <p>Valid till: <%=coupon.expirationDate.toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric', weekday: 'long' })%></p>
+                          <p>
+                            Valid till:
+                            <%=coupon.expirationDate.toLocaleDateString('en-GB',
+                            { day: '2-digit', month: '2-digit', year: 'numeric',
+                            weekday: 'long' })%>
+                          </p>
                           <!-- <p>Valid till: {{formatDate endDate}}</p> -->
 
                           <hr />
                         </ul>
-                        
+
                         <% }); %>
                       </div>
                     </div>
@@ -231,7 +242,7 @@
                         <td class="cart_total_label">Coupon savings</td>
                         <td class="cart_discount">
                           <i class="ti-gift mr-5"></i
-                          ><span id="coupon-offer-total">₹0.00</span>
+                          ><span id="coupon-offer-total">0</span>
                         </td>
                       </tr>
                       <tr>
@@ -395,11 +406,13 @@
       }
     }
 
+    const couponCode = document.getElementById("coupon-code-input").value;
+
     // Update the cart total on the page
     document.getElementById("cartSubTotal").innerHTML = "&#8377; " + cartTotal;
     document.getElementById("cartTotal").innerHTML = "&#8377; " + cartTotal;
 
-   
+    applyCoupon(couponCode, cartTotal);
   }
 
   //Change_Cart_Quantity
@@ -498,70 +511,105 @@
 
 <!-- Apply_Coupon -->
 <script>
-    $(document).ready(function () {
-        $("#apply-coupon-form").submit(function (event) {
-            console.log('apply-coupon')
-            event.preventDefault();
-            var couponCode = $("#coupon-code-input").val();
+  $(document).ready(function () {
+    $("#apply-coupon-form").submit(function (event) {
+      console.log("apply-coupon");
+      event.preventDefault();
+      var couponCode = $("#coupon-code-input").val();
 
-            const subtotalElements = document.querySelectorAll(".subtotal span");
-            let cartTotal = 0;
-            // Loop through all the subtotals and calculate the total
-            for (let i = 0; i < subtotalElements.length; i++) {
-              const subtotal = parseFloat(subtotalElements[i].textContent);
-              if (!isNaN(subtotal)) {
-                cartTotal += subtotal;
-              }
-            }
-            var cartDiscountRow = document.querySelector('.coupon_discount');
-
-            $.ajax({
-                type: "POST",
-                url: "/apply-coupon",
-                data: {
-                    couponCode: couponCode,
-                    cartTotal:cartTotal
-                },
-                success: function (response) {
-                    if (response.error) {
-                        $("#coupon-error-message").text(response.error);
-                        $("#coupon-success-message").text("");
-                        // $("#amount-to-pay").text(response.total);
-                    } else if (response.success) {
-                        $("#coupon-success-message").text(response.success);
-                        $("#coupon-error-message").text("");
-                        // $("#amount-to-pay").text(response.total);
-                        $("#cartTotal").text("₹"+response.total);
-                        cartDiscountRow.classList.remove('d-none');
-                        $("#coupon-offer-total").text(response.offer);
-                        $("#apply-coupon-button").prop("disabled", true).text("Applied");
-                        // add remove button
-                        const removeButton = $('<button>', {
-                            text: 'Remove coupon',
-                            click: function () {
-                                location.reload();
-                            }
-                        });
-                        removeButton.css({
-                            'background-color': '#F44336',
-                            'border': 'none',
-                            'color': 'white',
-                            'padding': '10px',
-                            'text-align': 'center',
-                            'text-decoration': 'none',
-                            'display': 'inline-block',
-                            'font-size': '16px',
-                            'margin-top': '10px',
-                            'cursor': 'pointer',
-                            'border-radius': '5px'
-                        });
-                        $("#apply-coupon-form").append(removeButton);
-                    }
-                },
-                error: function (xhr, status, error) {
-                    console.error(error);
-                }
-            });
-        });
+      const subtotalElements = document.querySelectorAll(".subtotal span");
+      let cartTotal = 0;
+      // Loop through all the subtotals and calculate the total
+      for (let i = 0; i < subtotalElements.length; i++) {
+        const subtotal = parseFloat(subtotalElements[i].textContent);
+        if (!isNaN(subtotal)) {
+          cartTotal += subtotal;
+        }
+      }
+      applyCoupon(couponCode, cartTotal);
     });
+  });
+
+  function applyCoupon(couponCode, cartTotal) {
+    var cartDiscountRow = document.querySelector(".coupon_discount");
+    var removeCoupon = document.getElementById("removeCoupon");
+    $.ajax({
+      type: "POST",
+      url: "/apply-coupon",
+      data: {
+        couponCode: couponCode,
+        cartTotal: cartTotal,
+      },
+      success: function (response) {
+        if (response.error) {
+          $("#coupon-error-message").text(response.error);
+          $("#coupon-success-message").text("");
+          // $("#amount-to-pay").text(response.total);
+        } else if (response.success) {
+          $("#coupon-success-message").text(response.success);
+          $("#coupon-error-message").text("");
+          // $("#amount-to-pay").text(response.total);
+          $("#cartTotal").text("₹" + response.total);
+          cartDiscountRow.classList.remove("d-none");
+          removeCoupon.classList.remove("d-none");
+          $("#coupon-offer-total").text(response.offer);
+          $("#apply-coupon-button").prop("disabled", true).text("Applied");
+          // add remove button
+          // const removeButton = $('<button>', {
+          //     text: 'Remove coupon',
+          //     click: function () {
+          //         location.reload();
+          //     }
+          // });
+          // removeButton.css({
+          //     'background-color': '#F44336',
+          //     'border': 'none',
+          //     'color': 'white',
+          //     'padding': '10px',
+          //     'text-align': 'center',
+          //     'text-decoration': 'none',
+          //     'display': 'inline-block',
+          //     'font-size': '16px',
+          //     'margin-top': '10px',
+          //     'cursor': 'pointer',
+          //     'border-radius': '5px'
+          // });
+          // $("#apply-coupon-form").append(removeButton);
+        }
+      },
+      error: function (xhr, status, error) {
+        console.error(error);
+      },
+    });
+  }
+
+  // var removeCoupon = document.getElementById("removeCoupon");
+  // removeCoupon.addEventListener("click", function () {
+  //   // Reload the page
+  //   location.reload();
+  // });
+</script>
+
+
+<!-- Remove_Coupon -->
+<script>
+  $(document).ready(function() {
+  $("#removeCoupon").on("click", function() {
+    // Make an AJAX GET request
+    $.ajax({
+      url: "/remove-coupon", // Example API endpoint
+      method: "GET",
+      success: function(response) {
+        // Handle the response data
+          location.reload()
+
+      },
+      error: function(xhr, status, error) {
+        console.error("AJAX error:", error);
+        $("#output").html("An error occurred while fetching data.");
+      }
+    });
+  });
+});
+
 </script>

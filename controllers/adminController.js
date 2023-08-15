@@ -602,7 +602,7 @@ const changeOrderStatus = async (req, res) => {
 //Get_Coupon
 const getCoupon = async (req, res) => {
   try {
-    const data = await Coupon.find({isActive:true}).lean();
+    const data = await Coupon.find().lean();
     const coupons = data.reverse();
     res.render("coupons", { admin: true, coupons });
   } catch (error) {
@@ -612,18 +612,22 @@ const getCoupon = async (req, res) => {
 
 const postCoupon = async (req, res) => {
   try {
+    console.log(req.body)
     const data = await Coupon.findOne({code:req.body.code,isActive:false});
+
     if(data){
       data.isActive=true;
       await data.save();
     }else{
+      const expirationDate= new Date(req.body.expirationDate);
+      expirationDate.setHours(23, 59, 59, 999)
       const newCoupon = new Coupon({
         code: req.body.code,
         discountPercentage: req.body.discountPercentage,
         maxDiscount: req.body.maxDiscountAmount,
         minAmount: req.body.minAmount,
         description: req.body.description,
-        expirationDate: req.body.expirationDate,
+        expirationDate:expirationDate,
       });
       newCoupon.save();
     }
@@ -637,15 +641,33 @@ const postCoupon = async (req, res) => {
 const deleteCoupon = async (req, res) => {
   try {
     const { couponId } = req.body;
-    await Coupon.updateOne(
-      {_id:couponId},
-      {$set:{isActive:false}}
+    await Coupon.deleteOne(
+      {_id:couponId}
       );
       res.status(200).json({status:true})
   } catch (error) {
     console.log(error.message);
   }
 };
+
+
+ const blockCoupon = async (req,res)=>{
+  try {
+    const { id } = req.query;
+    console.log(req.query)
+    const couponData= await Coupon.findById(id);
+      if(couponData.isActive){
+        couponData.isActive=false
+      }else{
+        couponData.isActive=true
+      }
+      await couponData.save()
+      res.redirect('/admin/coupons')
+      
+  } catch (error) {
+    console.log(error.message)
+  }
+ }
 
 module.exports = {
   loginLoad,
@@ -663,4 +685,5 @@ module.exports = {
   getCoupon,
   postCoupon,
   deleteCoupon,
+  blockCoupon
 };

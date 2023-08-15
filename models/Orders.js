@@ -39,6 +39,10 @@ const OrdersSchema= new mongoose.Schema(
         paymentMethod: {
             type: String,
             required: true
+        },
+        couponSaving:{
+            type:Number,
+            required:true
         }
     }
 );

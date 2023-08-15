@@ -1,0 +1,225 @@
+<!-- <head> -->
+
+<!-- Template CSS -->
+<!-- <link href="/admin-assets/css/main.css" rel="stylesheet" type="text/css" />
+    <style>
+        body{
+            background-color: #fff;
+        }
+    </style>
+</head> -->
+
+<!-- <script src="https://kit.fontawesome.com/1236d29865.js" crossorigin="anonymous"></script> -->
+
+<!-- <section class="content-main">
+  <div>
+    <a href="/profile"><i class="fa-solid fa-arrow-left-long"></i> Go back</a>
+  </div>
+  <br />
+  <div class="row">
+    <div class="col-12">
+      <div class="content-header">
+        <h2 class="content-title">My wallet</h2>
+      </div>
+      <div>
+        <h4>
+          Available balance:
+          <a href="">
+            <%= wallet && wallet.balance !== null ?
+            wallet.balance.toLocaleString('en-US', { style: 'currency',
+            currency: 'INR' }) : '₹0' %>
+          </a>
+        </h4>
+        <hr />
+      </div>
+    </div>
+    <div class="col-9">
+      <div class="table-responsive">
+        <h4 class="content-title">Transactions</h4>
+        <% if (transactions && transactions.length > 0) { %>
+        <table class="table table-hover">
+          <tbody>
+            <% transactions.forEach(function(tran) { %>
+            <tr>
+              <p>
+                <%=tran.date.c%>
+              </p>
+              <p>ID: <%=tran.orderId%></p>
+              <p>
+                <%=tran.amount.toLocaleString('en-US', { style: 'currency',
+                currency: 'INR' })%> <% if (tran.type === 'credit') { %>
+                <span class="badge rounded-pill alert-success">Credited</span>
+                <% } else { %>
+                <span class="badge rounded-pill alert-danger">Debited</span>
+                <% } %>
+              </p>
+              <br />
+            </tr>
+            <% }) %>
+          </tbody>
+        </table>
+        <% } else { %>
+        <p>No transactions available.</p>
+        <% } %>
+      </div>
+    </div>
+  </div>
+</section>  -->
+<!-- content-main end// -->
+
+\
+
+<head>
+  <!-- Meta tags, title, and other head content here -->
+  <link href="/admin-assets/css/main.css" rel="stylesheet" type="text/css" />
+  <link
+    href="https://kit.fontawesome.com/1236d29865.js"
+    rel="stylesheet"
+    crossorigin="anonymous"
+  />
+  <style>
+    body {
+      background-color: #fff;
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+    }
+
+    .content-main {
+      padding: 20px;
+    }
+
+    .go-back-link {
+      color: #007bff;
+      text-decoration: none;
+      font-size: 18px;
+      display: inline-block;
+      margin-bottom: 10px;
+    }
+
+    .go-back-link i {
+      margin-right: 5px;
+    }
+
+    .balance {
+      margin-bottom: 20px;
+    }
+
+    .balance h4 {
+      font-size: 24px;
+      margin: 0;
+    }
+
+    .balance a {
+      color: #007bff;
+      text-decoration: none;
+    }
+
+    .balance-badge {
+      font-size: 16px;
+      padding: 4px 10px;
+      border-radius: 20px;
+    }
+
+    .success-badge {
+      background-color: #28a745;
+      color: #fff;
+    }
+
+    .danger-badge {
+      background-color: #dc3545;
+      color: #fff;
+    }
+
+    .table-responsive {
+      margin-top: 20px;
+    }
+
+    .table-hover th,
+    .table-hover td {
+      vertical-align: middle;
+    }
+
+    .table-hover th {
+      font-weight: bold;
+      color: #333;
+    }
+  </style>
+</head>
+
+<body>
+  <section class="content-main">
+    <div>
+      <a href="/profile" class="go-back-link">
+        <i class="fas fa-arrow-left-long"></i> Go back
+      </a>
+    </div>
+    <h2
+      class="content-title m-5 text-center"
+      style="
+        font-family: Lora;
+        font-size: 32px;
+        color: #333;
+        text-align: center;
+        padding: 15px;
+        font-weight: 400;
+      "
+    >
+      My Wallet
+    </h2>
+
+    <div class="balance">
+      <h4>
+        Available balance:
+        <a href="#">
+          <%= wallet && wallet.balance !== null ?
+          wallet.balance.toLocaleString('en-US', { style: 'currency', currency:
+          'INR' }) : '₹0' %>
+        </a>
+      </h4>
+      <hr />
+    </div>
+    <div class="row">
+      <div class="col-12">
+        <div class="table-responsive">
+          <% if (transactions && transactions.length > 0) { %>
+          <table class="table table-hover">
+            <thead>
+              <tr>
+                <th>Date</th>
+                <th>Order ID</th>
+                <th>Amount</th>
+                <th>Type</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% transactions.forEach(function(tran) { %>
+              <tr>
+                <td>
+                  <%=tran.date.toLocaleDateString('en-GB', { day: '2-digit',
+                  month: '2-digit', year: 'numeric', weekday: 'long' })%>
+                </td>
+                <td><%=tran.orderId%></td>
+                <td>
+                  <%=tran.amount.toLocaleString('en-US', { style: 'currency',
+                  currency: 'INR' })%>
+                </td>
+                <td>
+                  <span
+                    class="balance-badge <%= tran.type === 'credit' ? 'success-badge' : 'danger-badge' %>"
+                  >
+                    <%= tran.type === 'credit' ? 'Credited' : 'Debited' %>
+                  </span>
+                </td>
+              </tr>
+              <% }) %>
+            </tbody>
+          </table>
+          <% } else { %>
+          <p>No transactions available.</p>
+          <% } %>
+        </div>
+      </div>
+    </div>
+  </section>
+</body>

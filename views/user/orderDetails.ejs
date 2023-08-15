@@ -46,12 +46,14 @@
 
                             <button id="returnButton" class="btn btn-sm" onclick="" data-bs-toggle="modal" data-bs-target="#returnModal"
                                 data-bs-whatever="@mdo">Return</button>
+                                <div id="returnValidityDate" class="text-muted"></div>
+                                <a id="generate-invoice-button" class="btn btn-sm">Download invoice</a>
+
+
                             <% } %>
 
-                            <div id="returnValidityDate" class="text-muted"></div>
 
-                            <!-- {{!-- for invoice --}}
-                            <a id="generate-invoice-button" class="btn btn-sm">Download invoice</a> -->
+                             <!-- {{!-- for invoice --}} -->
 
                         </div>
 
@@ -282,27 +284,73 @@
 
         <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.0.19/dist/sweetalert2.all.min.js"></script>
 
-        <!-- <script>
-            function isWithinReturnWindow(orderDate) {
-              // Your function logic here
-              const returnWindowDays = 3; // Change this to the number of days for the return window
-              const now = new Date();
-              const orderDateObj = new Date(orderDate);
-              orderDateObj.setDate(orderDateObj.getDate() + returnWindowDays);
-              return now <= orderDateObj;
-            }
-            
-            document.addEventListener('DOMContentLoaded', function() {
-              const returnButton = document.getElementById('returnButton');
-              const orderDate = '<%= orderDetails[0].createdAt %>'; // Inject the order date from EJS
-            
-              if (isWithinReturnWindow(orderDate)) {
-                returnButton.removeAttribute('disabled'); // Enable the button
-              } else {
-                returnButton.setAttribute('disabled', 'true'); // Disable the button
-              }
+     
+        <!-- Generate-Invoice  -->
+        <script>
+            // Get a reference to the button that triggers the sales report generation
+            const generateReportButton = document.getElementById('generate-invoice-button');
+            const orderElement = document.getElementById('order-id');
+            const orderId = orderElement.textContent;
+            // Add a click event listener to the button
+            generateReportButton.addEventListener('click', function () {
+                generateSalesReport('pdf')
             });
-            </script> -->
+            const generateSalesReport = (format) => {
+                $.ajax({
+                    url: `/create-invoice?orderId=${orderId}`,
+                    data: { format },
+                    method: 'post',
+                    xhrFields: {
+                        responseType: 'blob' // set the response type to blob
+                    },
+                    success: function (response, status, xhr) {
+                        const contentType = xhr.getResponseHeader('Content-Type')
+                        const fileExtension = contentType === 'application/pdf' ? 'pdf' : 'xlsx'
+                        const fileName = `sales-report.${fileExtension}`
+                        const blob = new Blob([response], { type: contentType })
+
+                        if (contentType === 'application/pdf') {
+                            // Confirm if user wants to open PDF file in new window
+                            Swal.fire({
+                                title: 'Do you want to download the PDF file?',
+                                icon: 'question',
+                                showCancelButton: true,
+                                confirmButtonText: '<i class="fas fa-download"></i> Download',
+                                cancelButtonText: 'Cancel',
+                            }).then((result) => {
+                                if (result.isConfirmed) {
+                                    const fileURL = URL.createObjectURL(blob)
+                                    const a = document.createElement('a')
+                                    a.href = fileURL
+                                    a.download = fileName
+                                    document.body.appendChild(a)
+                                    a.click()
+                                    document.body.removeChild(a)
+                                }
+                            })
+                        } else {
+                            Swal.fire({
+                                title: 'Download failed please try again later..!',
+                                icon: 'question',
+                                showCancelButton: true,
+                                confirmButtonText: 'Try again',
+                                cancelButtonText: 'ok'
+                            }).then((result) => {
+                                if (result.isConfirmed) {
+                                    location.href = '/admin/create-report'
+                                }
+                            })
+                            // Unsupported file type
+                            console.error('Unsupported file type:', contentType)
+                        }
+                    }, error: function (xhr, status, error) {
+                        console.log('Error generating report:', error)
+                    }
+                })
+            }
+        </script>
+
+
 
 
 
@@ -338,19 +386,6 @@
             </script>
             
             
-
-
-
-        <!-- <script>
-            function isWithinReturnWindow(orderDate) {
-              const returnWindowDays = 3; // Change this to the number of days for the return window
-              const now = new Date();
-              const orderDateObj = new Date(orderDate);
-              orderDateObj.setDate(orderDateObj.getDate() + returnWindowDays);
-              return now <= orderDateObj;
-            }
-            </script>
-             -->
 
 <script>
     function formatDate(dateString) {
