@@ -347,9 +347,9 @@
     $(function() {
         sliderrange.slider({
             range: true,
-            min: 1000,
-            max: 200000,
-            values: [0, 20000],
+            min: 10000,
+            max: 500000,
+            values: [10000, 50000],
             slide: function(event, ui) {
                 amountprice.val("₹" + ui.values[0] + " - ₹" + ui.values[1]);
             }

@@ -174,6 +174,24 @@ module.exports={
         } catch (error) {
             console.log(error.message)
         }
+    },
+
+
+    //SubCetgories_For_ Product_Adding
+    findSubCategories:async (req,res)=>{
+        try {
+            const {selectedCategory}= req.body;
+            console.log(selectedCategory)
+            const data= await Category.aggregate([
+                {$match:{name:selectedCategory}},
+                {$group:{_id:"$subCategory"}}
+            ]);
+            const subcategoriesData= data[0]._id
+            console.log(subcategoriesData)
+            res.status(200).json({subcategoriesData})
+        } catch (error) {
+            console.log(error.message)
+        }
     }
 
 }

@@ -8,6 +8,7 @@ const Products = require("../models/Products");
 const Orders = require("../models/Orders");
 const Wishlist = require("../models/Wishlist");
 const Cart = require("../models/Cart");
+const Banner = require("../models/Banners");
 const { query } = require("express");
 const { ObjectId } = require("mongodb");
 const { json } = require("body-parser");
@@ -23,7 +24,9 @@ const getHome = async (req, res) => {
       // Clear the success message from the session to prevent showing it again on page refresh
       delete req.session.successMessage;
     }
-    res.render("home", { successMessage, categories }); // Pass the successMessage to the view
+    const currentdate= new Date()
+    const banners = await Banner.find({isActive:true, startDate:{$lte:currentdate},endDate:{$gte:currentdate}})
+    res.render("home", { successMessage, categories,banners }); // Pass the successMessage to the view
   } catch (error) {
     console.log(error.message);
   }
@@ -367,10 +370,22 @@ const getProducts = async (req, res) => {
     console.log(req.query);
     console.log("BODY :::", req.body);
     const priceLimit = req.body.price;
-
+    
     const { category } = req.query;
     const query = { category: category };
     query.isActive = true;
+
+    let color = []
+    if(req.body.color){
+      if (Array.isArray(req.body.color)) {
+        color = req.body.subCategory;
+      } else {
+        color = [req.body.color];
+      }
+    }
+    if(color.length > 0 ){
+      query.color= { $in:color }
+    }
 
     let subCategory = "";
 
@@ -415,7 +430,12 @@ const getProducts = async (req, res) => {
     // const data = await Products.find(query);
 
     const page = parseInt(req.query.page) || 1;
+    console.log('PAGE',page)
     const perPage = 8;
+    const skip = (page - 1) * perPage;
+
+    // const page = parseInt(req.query.page) || 1;
+    // const perPage = 8;
 
     // Build the aggregation pipeline
     const aggregationPipeline = [
@@ -432,6 +452,14 @@ const getProducts = async (req, res) => {
         $replaceRoot: { newRoot: "$firstProduct" },
       },
     ];
+    const count = await Products.aggregate(aggregationPipeline);
+
+    const totalProducts = count.length;
+    console.log(totalProducts)
+    const totalPages = Math.ceil(totalProducts / perPage);
+
+    aggregationPipeline.push({ $skip: skip });
+    aggregationPipeline.push({ $limit: perPage });
 
     if (sort === "hightToLow") {
       aggregationPipeline.push({ $sort: { price: -1 } }); // Sort by price high to low
@@ -440,8 +468,7 @@ const getProducts = async (req, res) => {
     }
 
     const data = await Products.aggregate(aggregationPipeline);
-    const totalProducts = data.length;
-    const totalPages = Math.ceil(totalProducts / perPage);
+    
 
     if (data.length === 0) {
       // Render the "No products found" page
@@ -456,7 +483,7 @@ const getProducts = async (req, res) => {
     if (req.xhr) {
       return res.json({ data, categoryList });
     }
-    res.render("products", { data, categoryList });
+    res.render("products", { data, categoryList , totalPages,currentPage: page });
   } catch (error) {
     console.log(error.message);
   }
@@ -475,10 +502,12 @@ const viewProduct = async (req, res) => {
     console.log("wishlist::::", wishlist);
     const data = await Products.find(
       { name: product.name, totalQty: { $gte: 1 } },
-      { _id: 0, size: 1 }
+      { _id: 0, size: 1 , color:1}
     );
     const sizeData = data.map((sizeObj) => sizeObj.size);
-    res.render("productDetails", { product, wishlist, sizeData });
+    const colorData= data.map((colorObj)=> colorObj.color)
+    console.log(colorData)
+    res.render("productDetails", { product, wishlist, sizeData, colorData });
   } catch (error) {
     console.log(error.message);
   }
@@ -822,6 +851,59 @@ const error = async (req, res) => {
   } catch (error) {}
 };
 
+
+// //Stock_Check_with_Color
+const stockCheck = async (req,res)=>{
+  try {
+    console.log(req.body)
+      const {selectedColor,productId}= req.body;
+      const productData = await Products.findOne({_id:productId})
+      console.log(productData.name)
+      const data = await Products.find(
+        { name: productData.name, totalQty: { $gte: 1 },color:selectedColor },
+        { _id: 0, size: 1}
+      );
+      const sizes = data.map((sizeObj) => sizeObj.size);
+
+      console.log(sizes)
+      res.json({sizes})
+  } catch (error) {
+      console.log(error.message)
+  }
+};
+
+
+
+
+///getSelectedProduct
+const getSelectedProduct= async (req,res)=>{
+  try {
+    console.log(req.body)
+    const {selectedColor,productName,selectedSize, category, subCategory}=req.body;
+
+    const query= {
+      category:category,
+      subCategory:subCategory,
+      color:selectedColor
+    };
+    if(selectedSize){
+      query.size=selectedSize
+    }
+    console.log('query::::',query)
+
+    const data= await Products.findOne(query);
+    console.log(data)
+
+      res.json({productId:data._id})
+
+
+  } catch (error) {
+    console.log(error.message)
+  }
+
+}
+
+
 module.exports = {
   getHome,
   loginLoad,
@@ -844,5 +926,7 @@ module.exports = {
   addToWishlist,
   deleteWishlist,
   generateInvoice,
+  stockCheck,
+  getSelectedProduct,
   error,
 };

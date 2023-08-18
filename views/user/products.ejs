@@ -1,3 +1,4 @@
+
 <main class="main">
   <div class="page-header breadcrumb-wrap">
     <div class="container">
@@ -136,7 +137,7 @@
                       <a
                         aria-label="Add To Cart"
                         class="action-btn hover-up"
-                        onclick="addToCart('<%=data[i]._id%>','<%=data[i].size%>')"
+                        onclick="addToCart('<%=data[i]._id%>','<%=data[i].size%>','<%=data[i].color%>')"
                         ><i class="fi-rs-shopping-bag-add"></i
                       ></a>
                     </div>
@@ -183,7 +184,7 @@
           </div>
           </div>
           <!-- pagination-->
-          <div class="pagination-area mt-15 mb-sm-5 mb-lg-0">
+          <!-- <div class="pagination-area mt-15 mb-sm-5 mb-lg-0">
             <nav aria-label="Page navigation example">
               <ul class="pagination justify-content-start">
                 
@@ -204,7 +205,47 @@
                 
               </ul>
             </nav>
+          </div> -->
+
+          <!-- pagination-->
+
+          <div class="pagination-area mt-15 mb-5">
+            <nav aria-label="Page navigation example">
+              <ul class="pagination justify-content-start">
+                <li class="page-item <%= currentPage === 1 ? '' : '' %>">
+                  <a class="page-link" href="<%= currentPage === 1 ? '#' : '?page=1&category=' + data[0].category %>"><i class="fa-solid fa-angles-left"></i></a>
+                </li>
+                <% const maxVisiblePages = 3; %> <!-- Maximum number of visible pages excluding dots -->
+                <% const startPage = Math.max(1, currentPage - Math.floor(maxVisiblePages / 2)); %>
+                <% const endPage = Math.min(totalPages, startPage + maxVisiblePages - 1); %>
+                <% if (startPage > 1) { %>
+                  <li class="page-item">
+                    <a class="page-link dot" href="#">...</a>
+                  </li>
+                <% } %>
+                <% for (let page = startPage; page <= endPage; page++) { %>
+                  <li class="page-item <%= page === currentPage ? 'active' : '' %>">
+                    <a class="page-link" href="<%= page !== currentPage ? '?page=' + page + '&category=' + data[0].category : '#' %>"><%= page.toString().padStart(2, '0') %></a>
+                  </li>
+                <% } %>
+                <% if (endPage < totalPages) { %>
+                  <li class="page-item">
+                    <a class="page-link dot" href="#">...</a>
+                  </li>
+                <% } %>
+                <li class="page-item <%= currentPage === totalPages ? 'disabled' : '' %>">
+                  <a class="page-link" href="<%= currentPage < totalPages ? '?page=' + (currentPage + 1) + '&category=' + data[0].category : '#' %>"><i class="fa-solid fa-angles-left fa-rotate-180"></i></a>
+                </li>
+              </ul>
+            </nav>
           </div>
+          
+          
+
+          
+          
+
+
         </div>
         <div class="col-lg-3 primary-sidebar sticky-sidebar">
           <div class="row">
@@ -288,10 +329,10 @@
                     type="checkbox"
                     name="color"
                     id="exampleCheckbox1"
-                    value="Red"
+                    value="black"
                   />
                   <label class="form-check-label" for="exampleCheckbox1"
-                    ><span>Red</span></label
+                    ><span>Black</span></label
                   >
                   <br />
                   <input
@@ -299,7 +340,7 @@
                     type="checkbox"
                     name="checkbox"
                     id="exampleCheckbox2"
-                    value="Green"
+                    value="green"
                   />
                   <label class="form-check-label" for="exampleCheckbox2"
                     ><span>Green</span></label
@@ -310,11 +351,33 @@
                     type="checkbox"
                     name="checkbox"
                     id="exampleCheckbox3"
-                    value="Blue"
+                    value="orange"
                   />
                   <label class="form-check-label" for="exampleCheckbox3"
-                    ><span>Blue</span></label
+                    ><span>Orange</span></label
                   >
+                  <br />
+                  <input
+                  class="form-check-input"
+                  type="checkbox"
+                  name="color"
+                  id="exampleCheckbox4"
+                  value="white"
+                />
+                <label class="form-check-label" for="exampleCheckbox4"
+                  ><span>White</span></label
+                >
+                <br />
+                <input
+                class="form-check-input"
+                type="checkbox"
+                name="color"
+                id="exampleCheckbox5"
+                value="silver"
+              />
+              <label class="form-check-label" for="exampleCheckbox5"
+                ><span>Silver</span></label
+              >
                 </div>
                
               </div>
@@ -384,10 +447,10 @@
 
 
 <script>
-   function addToCart(productId,size){
+   function addToCart(productId,size,color){
     console.log('sdfbsdhfhbsrdfijsdbfkhjjfnsffrfsdf')
     $.ajax({
-      url: `/user-add-to-cart?productId=${productId}&size=${size}`,
+      url: `/user-add-to-cart?productId=${productId}&size=${size}&color=${color}`,
       method: 'get',
       success: (response) => {
           
@@ -586,7 +649,41 @@
   });
 </script>
 
+<style>
+  .pagination {
+  margin: 20px 0;
+}
 
+.page-item {
+  display: inline-block;
+  margin: 0 5px;
+}
+
+.page-link {
+  padding: 8px 12px;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  color: #333;
+  text-decoration: none;
+}
+
+.page-link:hover {
+  background-color: #f5f5f5;
+}
+
+.active .page-link {
+  background-color: #007bff;
+  border-color: #007bff;
+  color: #fff;
+}
+
+.page-item-total {
+  margin: 0 10px;
+  font-style: italic;
+  color: #777;
+}
+
+</style>
 
 
 

@@ -10,6 +10,7 @@ const sessionHandling=require('../middleware/session-handling')
 const isLoggedIn=require('../middleware/isLoggedIn')
 const cartCount=require('../middleware/cartCount');
 const wishlistCount=require('../middleware/wishlistCount');
+const productController = require('../controllers/productController');
 // userRoute.use(isLoggedIn.isLoggedInMiddleware)
 userRoute.use(cartCount.cartCountMiddelware)
 userRoute.use(wishlistCount.wishlistCountMiddelware)
@@ -35,7 +36,7 @@ userRoute.post('/forgotPassword',userController.forgotVerify);
 userRoute.post('/forgotOtp',userController.forgotOTPVerification);
 userRoute.post('/setPassword',userController.verifyPassword);
 //Get_Products
-userRoute.get('/getProducts',userController.getProducts);
+userRoute.get('/getProducts',userController.getProducts); 
 userRoute.post('/getProducts',userController.getProducts);
 //Search_Products
 userRoute.get('/productSearch',userController.productSearch)
@@ -88,6 +89,10 @@ userRoute.post('/apply-coupon',cartController.applyCoupon);
 userRoute.get('/remove-coupon',sessionHandling.checkingUser,cartController.removeCoupon)
 //Generate_ Invoice 
 userRoute.post('/create-invoice',userController.generateInvoice)
+//Stock_Check
+userRoute.post('/stock-check',userController.stockCheck)
+///getSelectedProduct
+userRoute.post('/getSelectedProduct',userController.getSelectedProduct)
 
 
 

@@ -110,11 +110,30 @@
                                         <strong class="mr-10">Color</strong>
                                         <ul id="selectedColor" class="list-filter color-filter">
                                             
-                                            <li><a href="#" data-color="white"><span class="product-color-white"></span></a></li>
-                                            <li><a href="#" data-color="orange"><span class="product-color-orange"></span></a></li>
-                                            <li><a href="#" data-color="black"><span class="product-color-black"></span></a></li>
-                                            <li><a href="#" data-color="green"><span class="product-color-green"></span></a></li>
-                                            <li><a href="#" data-color="silver"><span class="product-color-silver"></span></a></li>
+                                            <li class="<%=   colorData.includes('white') ? 'available' : 'unavailable' %>"><a href="#" data-color="white"><span class="<%= colorData.includes('white') ? 'product-color-white' : '' %>">
+                                                
+                                            </span></a></li>
+                                            <li class="<%=  colorData.includes('orange') ? 'available' : 'unavailable' %>"><a href="#" data-color="orange"><span class="<%= colorData.includes('orange') ? 'product-color-orange' : '' %>">
+                                                <% if (!colorData.includes('orange')) { %>
+                                                    <i class="fa-solid fa-circle-xmark fa-shake fa-2xl" style="color: orange;position:relative;top: -8px;"></i>
+                                                <% } %>
+                                            </span></a></li>
+                                            <li class="<%=   colorData.includes('black') ? 'available' : 'unavailable' %>"><a href="#" data-color="black"><span class="<%= colorData.includes('black') ? 'product-color-black' : '' %>">
+                                                <% if (!colorData.includes('black')) { %>
+                                                    <i class="fa-solid fa-circle-xmark fa-shake fa-2xl" style="color: black;position:relative;top: -8px;"></i>
+                                                <% } %>
+                                            </span></a></li>
+                                            <li class="<%=   colorData.includes('green') ? 'available' : 'unavailable' %>"><a href="#" data-color="green"><span class="<%= colorData.includes('green') ? 'product-color-green' : '' %>">
+                                                <% if (!colorData.includes('green')) { %>
+                                                    <i class="fa-solid fa-circle-xmark fa-shake fa-2xl" style="color: #014608;position:relative;top: -8px;"></i>
+                                                <% } %>
+                                            </span></a></li>
+                                            <li class="<%=    colorData.includes('silver') ? 'available' : 'unavailable' %>"><a href="#" data-color="silver"><span class="<%= colorData.includes('silver') ? 'product-color-silver' : '' %>">
+                                                <% if (!colorData.includes('silver')) { %>
+                                                    <i class="fa-solid fa-circle-xmark fa-shake fa-2xl" style="color: #c0c0c0;position:relative;top: -8px;"></i>
+                                                <% } %>
+                                            </span></a></li>
+                                            
                                         </ul>
                                     </div>
                                     <% } %>
@@ -122,7 +141,7 @@
                                         <span id="sizeErrorMessage" class="text-danger hidden">Please select a size !</span>
                                     <div class="attr-detail attr-size">
                                         <strong class="mr-10">Size</strong>
-                                        <ul id="selectedSize" class="list-filter size-filter font-small">
+                                        <ul id="selectedSizes" class="list-filter size-filter font-small">
                                             <!-- <li><a href="#">128 GB</a></li>
                                             <li class="active"><a href="#">256 GB</a></li>
                                             <li><a href="#">512 GB</a></li>
@@ -173,7 +192,7 @@
                                             
 
 
-                                            <a aria-label="Compare" class="action-btn hover-up" href="shop-compare.html"><i class="fi-rs-shuffle"></i></a>
+                                            <!-- <a aria-label="Compare" class="action-btn hover-up" href="shop-compare.html"><i class="fi-rs-shuffle"></i></a> -->
                                             
                                         </div>
                                         <br>
@@ -738,7 +757,7 @@
     function redirectToCart() {
 
         const colorOptions = document.querySelectorAll('#selectedColor li');
-        const sizeOptions = document.querySelectorAll('#selectedSize li');
+        const sizeOptions = document.querySelectorAll('#selectedSizes li');
   let selectedColor;
   let selectedSize;
 
@@ -826,11 +845,150 @@
     });
   </script> 
 
-
 <style>
     
     .empty {
       opacity: 0.5;
       pointer-events: none;
     }
+
+    /* Style for available colors */
+.available a {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+/* Style for unavailable colors */
+.unavailable a {
+  /* opacity: 0.5; You can adjust the opacity value */
+  pointer-events: none;
+  
+}
+
+
   </style>
+
+
+<!-- Color_Check -->
+<script>
+    
+
+    $(document).ready(function () {
+      $('.color-filter a').on('click', function (event) {
+        event.preventDefault();
+        
+        var selectedColor = $(this).data('color');
+        console.log(selectedColor)
+
+
+        if(selectedColor !== '<%=product.color%>' && ('<%=product.category%>'=== 'headphones' || '<%=product.category%>'=== 'Watches')){
+            console.log('hehe__dahm it ')
+
+            $.ajax({
+          url:'/getSelectedProduct', // Replace with your server endpoint
+          type: 'POST',
+          contentType: 'application/json',
+          data: JSON.stringify({ selectedColor: selectedColor, productName:'<%=product.name%>',category:'<%=product.category%>', subCategory:'<%=product.subCategory%>'}),
+          success: function (response) {
+           const productId= response.productId
+            console.log(productId)
+            console.log('success')
+            window.location.href=`/productDetails?id=${productId}`
+          },
+          error: function (error) {
+            console.error('Error:', error);
+            // Handle error cases here
+          }
+        });
+
+        }else{
+            var sizeItems = document.querySelectorAll('#selectedSizes li');
+            sizeItems.forEach(function (sizeItem) {
+      sizeItem.classList.remove('active');
+    });
+
+      // Perform an AJAX request using jQuery
+      $.ajax({
+          url:'/stock-check', // Replace with your server endpoint
+          type: 'POST',
+          contentType: 'application/json',
+          data: JSON.stringify({ selectedColor: selectedColor, productId:'<%=product._id%>' }),
+          success: function (response) {
+            const sizes= response.sizes
+            // You can update UI or perform other actions here
+            var sizeList = document.getElementById('selectedSizes'); // Assuming 'selectedSizes' is the ID of the <ul> element
+
+            var sizeItems = sizeList.querySelectorAll('li');
+
+            sizeItems.forEach(sizeItem => {
+          var sizeLink = sizeItem.querySelector('a');
+          var size = sizeLink.getAttribute('data-size');
+          
+
+          if (sizes.includes(size)) {
+            sizeItem.classList.remove('empty');
+          } else {
+            sizeItem.classList.add('empty');
+          }
+        });
+        // console.log('success')
+          },
+          error: function (error) {
+            console.error('Error:', error);
+            // Handle error cases here
+          }
+        });
+
+
+        }
+
+        
+        // console.log(selectedColor)
+
+      
+      });
+    });
+  </script>
+
+
+
+<!-- stock-check -->
+    <script>
+
+    $(document).ready(function () {
+      $('.size-filter a').on('click', function (event) {
+        event.preventDefault();
+        
+        var selectedSize = $(this).data('size');
+        var colorItem = $('.color-filter li.active');
+var selectedColor = colorItem.find('a').data('color');
+       
+        console.log(selectedColor)
+        console.log(selectedSize)
+        if(selectedSize && selectedColor){
+            if(selectedSize !== '<%=product.size%>' || selectedColor !== '<%=product.color%>'){
+                   // Perform an AJAX request using jQuery
+        $.ajax({
+          url:'/getSelectedProduct', // Replace with your server endpoint
+          type: 'POST',
+          contentType: 'application/json',
+          data: JSON.stringify({ selectedColor: selectedColor, productName:'<%=product.name%>', selectedSize:selectedSize ,category:'<%=product.category%>', subCategory:'<%=product.subCategory%>'}),
+          success: function (response) {
+           const productId= response.productId
+            console.log(productId)
+            console.log('success')
+            window.location.href=`/productDetails?id=${productId}`
+          },
+          error: function (error) {
+            console.error('Error:', error);
+            // Handle error cases here
+          }
+        });
+            }
+        }
+
+     
+      });
+    });
+  </script>
+  

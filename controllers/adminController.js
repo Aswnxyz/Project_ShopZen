@@ -6,6 +6,9 @@ const bcrypt = require("bcrypt");
 const { captureRejectionSymbol } = require("nodemailer/lib/xoauth2");
 const Category = require("../models/Category");
 const Coupon = require("../models/Coupons");
+const Banner = require("../models/Banners");
+const path = require("path");
+
 // const { default: products } = require('razorpay/dist/types/products');
 
 const dashBoard = async (req, res) => {
@@ -612,26 +615,26 @@ const getCoupon = async (req, res) => {
 
 const postCoupon = async (req, res) => {
   try {
-    console.log(req.body)
-    const data = await Coupon.findOne({code:req.body.code,isActive:false});
+    console.log(req.body);
+    const data = await Coupon.findOne({ code: req.body.code, isActive: false });
 
-    if(data){
-      data.isActive=true;
+    if (data) {
+      data.isActive = true;
       await data.save();
-    }else{
-      const expirationDate= new Date(req.body.expirationDate);
-      expirationDate.setHours(23, 59, 59, 999)
+    } else {
+      const expirationDate = new Date(req.body.expirationDate);
+      expirationDate.setHours(23, 59, 59, 999);
       const newCoupon = new Coupon({
         code: req.body.code,
         discountPercentage: req.body.discountPercentage,
         maxDiscount: req.body.maxDiscountAmount,
         minAmount: req.body.minAmount,
         description: req.body.description,
-        expirationDate:expirationDate,
+        expirationDate: expirationDate,
       });
       newCoupon.save();
     }
-   
+
     res.status(200).json({ status: true });
   } catch (error) {
     console.log(error.message);
@@ -641,33 +644,86 @@ const postCoupon = async (req, res) => {
 const deleteCoupon = async (req, res) => {
   try {
     const { couponId } = req.body;
-    await Coupon.deleteOne(
-      {_id:couponId}
-      );
-      res.status(200).json({status:true})
+    await Coupon.deleteOne({ _id: couponId });
+    res.status(200).json({ status: true });
   } catch (error) {
     console.log(error.message);
   }
 };
 
-
- const blockCoupon = async (req,res)=>{
+const blockCoupon = async (req, res) => {
   try {
     const { id } = req.query;
-    console.log(req.query)
-    const couponData= await Coupon.findById(id);
-      if(couponData.isActive){
-        couponData.isActive=false
-      }else{
-        couponData.isActive=true
-      }
-      await couponData.save()
-      res.redirect('/admin/coupons')
-      
+    console.log(req.query);
+    const couponData = await Coupon.findById(id);
+    if (couponData.isActive) {
+      couponData.isActive = false;
+    } else {
+      couponData.isActive = true;
+    }
+    await couponData.save();
+    res.redirect("/admin/coupons");
   } catch (error) {
-    console.log(error.message)
+    console.log(error.message);
   }
- }
+};
+
+//Banners
+const getBanners = async (req, res) => {
+  try {
+    const data = await Banner.find();
+    res.render("banners", { admin: true, data });
+  } catch (error) {
+    console.log(error.message);
+  }
+};
+
+const getAddBanner = async (req, res) => {
+  try {
+    res.render("add-banner", { admin: true });
+  } catch (error) {
+    console.log(error.message);
+  }
+};
+
+const postAddBanner = async (req, res) => {
+  try {
+    console.log(req.body);
+    const image = path.basename(req.file.path);
+    console.log(req.body);
+    const { title, startDate, endDate } = req.body;
+    const newBanner = new Banner({
+      title: title,
+      image: image,
+      startDate: setHoursToDate(startDate, 0, 0, 0), // Set hours to 00:00:00
+      endDate: setHoursToDate(endDate, 23, 59, 59), // Set hours to 23:59:59
+    });
+    await newBanner.save();
+    
+    function setHoursToDate(date, hours, minutes, seconds) {
+      const newDate = new Date(date);
+      newDate.setHours(hours);
+      newDate.setMinutes(minutes);
+      newDate.setSeconds(seconds);
+      return newDate;
+    }
+
+    res.status(200).json({ status: true });
+  } catch (error) {
+    console.log(error.message);
+  }
+};
+
+const deleteBanner = async (req, res) => {
+  try {
+    const { bannerId } = req.body;
+    console.log(bannerId);
+    await Banner.deleteOne({ _id: bannerId });
+    res.json({ status: true });
+  } catch (error) {
+    console.log(error.message);
+  }
+};
 
 module.exports = {
   loginLoad,
@@ -685,5 +741,9 @@ module.exports = {
   getCoupon,
   postCoupon,
   deleteCoupon,
-  blockCoupon
+  blockCoupon,
+  getBanners,
+  getAddBanner,
+  postAddBanner,
+  deleteBanner,
 };

@@ -9,7 +9,8 @@ const productController=require('../controllers/productController');
 // adminRoute.set('layout','../layouts')
 const sessionHandling=require('../middleware/session-handling')
 const isLoggedIn=require('../middleware/isLoggedIn')
-const upload=require('../middleware/multer')
+const productUpload=require('../middleware/productsMulter')
+const bannerUpload=require('../middleware/bannerMulter')
 
 
 
@@ -45,7 +46,7 @@ adminRoute.post("/editProdutSubcategory",categoryController.editProdutSubcategor
 adminRoute.get("/deleteProdutSubcategory",sessionHandling.checkingAdmin,categoryController.deleteProdutSubcategory);
 adminRoute.post("/editCategoryName",categoryController.editCategoryName);
 adminRoute.get("/add-product",sessionHandling.checkingAdmin,productController.getAddProduct);
-adminRoute.post("/add-product",upload,productController.postAddProduct);
+adminRoute.post("/add-product",productUpload,productController.postAddProduct);
 adminRoute.get("/orders",sessionHandling.checkingAdmin,adminController.getUserOrders);
 adminRoute.get('/user-orderDetails/:id',sessionHandling.checkingAdmin,adminController.userOrderDetails)
 adminRoute.post('/change-status',adminController.changeOrderStatus)
@@ -59,7 +60,15 @@ adminRoute.post('/coupons',adminController.postCoupon)
 adminRoute.post('/delete-coupon',adminController.deleteCoupon)
 //Block_Coupon
 adminRoute.get('/block-coupon',sessionHandling.checkingAdmin ,adminController.blockCoupon)
-
+//Banner 
+adminRoute.get('/banners',sessionHandling.checkingAdmin,adminController.getBanners)
+//Add_ banner
+adminRoute.get('/add-banner',sessionHandling.checkingAdmin,adminController.getAddBanner)
+adminRoute.post('/add-banner',bannerUpload,adminController.postAddBanner)  
+//Deletet_Banner
+adminRoute.post('/delete-banner',adminController.deleteBanner)
+//Find_Subcategories_For_Add_Product
+adminRoute.post('/findSubCategories',categoryController.findSubCategories)
 
 
 

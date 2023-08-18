@@ -61,19 +61,38 @@ module.exports = {
   addToCart: async (req, res) => {
     try {
       console.log("-=-=-=--=", req.query);
-      const { productId, size } = req.query;
+      const { productId, size, color } = req.query;
       console.log(productId);
       const quantity = parseFloat(req.query.quantity || 1);
-      const productObj = {
-        item: productId,
-        quantity: quantity,
-        size: size,
-      };
+
+       
       const limitedQuantity = Math.min(quantity, 10);
 
       const userId = req.session.user_id;
       const userCart = await Cart.findOne({ userId: userId });
       const product = await Product.findOne({ _id: new ObjectId(productId) });
+      let productObj;
+
+      if(product.category === 'smartphone' || product.category === 'Laptops'){
+        productObj = {
+          item: productId,
+          quantity: quantity,
+          size: size,
+          color:color
+        };
+      }else if(product.category !== 'cameras'){
+        productObj = {
+          item: productId,
+          quantity: quantity,
+          color:color
+        };
+      }else{
+        productObj = {
+          item: productId,
+          quantity: quantity,
+        };
+      }
+
       console.log("product_Here::::", product);
       if (userCart) {
         const prodExist = userCart.products.findIndex(
