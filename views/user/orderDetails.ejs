@@ -257,6 +257,18 @@
                                         <td colspan="4">
                                             <article class="float-end">
                                                 <dl class="dlist">
+                                                    <dt>Subtotal:</dt>
+                                                    <dd>₹ <%=orderDetails[0].totalPrice+orderDetails[0].couponSaving%></dd>
+                                                </dl>
+                                                <dl class="dlist">
+                                                    <dt>Discount/Coupon:</dt>
+                                                    <dd>₹ <%=orderDetails[0].couponSaving%></dd>
+                                                </dl>
+                                                <dl class="dlist">
+                                                    <dt>Shipping cost:</dt>
+                                                    <dd>0</dd>
+                                                </dl>
+                                                <dl class="dlist">
                                                     <dt>Grand total:</dt>
                                                     <dd> <b class="h5">₹<%=orderDetails[0].totalPrice%></b> </dd>
                                                 </dl>

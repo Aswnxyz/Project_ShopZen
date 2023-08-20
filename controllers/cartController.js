@@ -225,6 +225,7 @@ module.exports = {
     try {
       const userId = req.session.user_id;
       const { discountPrice, afterDiscount, couponCode } = req.session;
+      console.log('Discounted prices',req.session)
       const userCart = await Cart.findOne({ userId });
 
       const cartProducts = userCart.products;
@@ -248,7 +249,7 @@ module.exports = {
       console.log(cartItems);
 
       let cartTotal = cartSubTotal;
-      if (afterDiscount) {
+      if (afterDiscount>=0) {
         cartTotal = afterDiscount;
       }
 
@@ -426,11 +427,34 @@ module.exports = {
           currency: "INR",
           receipt: orderId,
         };
+        //If_The_Total_Payment_Amount_Is_Zero
+        if(options.amount === 0){
+          await Order.updateOne(
+            { orderId: orderId },
+            { $set: { paymentStatus: "completed" } }
+          );
+          for (let i = 0; i < products.length; i++) {
+            await Product.updateOne(
+              { _id: new ObjectId(products[i].item) },
+              { $inc: { totalQty: -products[i].quantity } } // Corrected access to the quantity value
+            );
+          }
+  
+          if(couponSaving){
+            const coupon = await Coupon.findOne({code:couponCode})
+            coupon.usedBy.push(userId);
+          await coupon.save()
+          }
+          await Cart.deleteOne({ userId: userId });
+  
+          res.json({ paymentOption: "Free" });
+        }else{
+          instance.orders.create(options, function (err, order) {
+            console.log("New Order : ", order);
+            res.json({ paymentOption: "Razorpay", order ,couponCode});
+          });
+        }
 
-        instance.orders.create(options, function (err, order) {
-          console.log("New Order : ", order);
-          res.json({ paymentOption: "Razorpay", order ,couponCode});
-        });
       } else if (payment_option === "COD") {
         for (let i = 0; i < products.length; i++) {
           await Product.updateOne(

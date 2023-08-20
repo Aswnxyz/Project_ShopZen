@@ -31,51 +31,7 @@
   
 
 </div>
-<!-- 
-<script>
 
-const timerElement = document.getElementById('timer');
-const resendForm = document.getElementById('resendForm');
-const endTime = new Date();
-endTime.setMinutes(endTime.getMinutes() + 1);
-endTime.setSeconds(endTime.getSeconds() + 59);
-
-function updateTimer() {
-  const currentTime = new Date();
-  const remainingTime = endTime - currentTime;
-
-  if (remainingTime <= 0) {
-    timerElement.textContent = 'Timer Expired';
-    resendForm.style.display = 'block'; // Show the resend OTP form
-  } else {
-    const minutes = Math.floor((remainingTime % (1000 * 60 * 60)) / (1000 * 60));
-    const seconds = Math.floor((remainingTime % (1000 * 60)) / 1000);
-    timerElement.textContent = `${minutes}:${seconds.toString().padStart(2, '0')}`;
-  }
-}
-
-setInterval(updateTimer, 1000);
-
-
-otpForm.addEventListener('submit', async (event) => {
-  event.preventDefault();
-  const formData = new FormData(otpForm);
-  const otp = formData.get('otp');
-  const userId = formData.get('user_Id');
-
-  // You should implement a function to send the OTP and verify it on the server-side.
-  const response = await verifyOTP(otp, userId); // Replace 'verifyOTP' with the actual server-side verification function
-
-  if (response.success) {
-    // OTP is valid
-    statusMessage.textContent = 'OTP verified successfully!';
-  } else {
-    // OTP is invalid
-    statusMessage.textContent = 'Invalid OTP. Please try again.';
-    resendForm.style.display = 'block'; // Show the resend OTP form
-  }
-});
-</script> -->
 
 
 

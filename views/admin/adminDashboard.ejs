@@ -81,6 +81,46 @@
             </div>
 
         </div>
+
+
+        <div class="row justify-content-between">
+            <div class="col-xl-4 col-sm-6 col-12 mb-4">
+              <div class="card">
+                <div class="card-body">
+                  <div class="d-flex justify-content-between px-md-1">
+                    <div class="align-self-center">
+                        <i class="fa-solid fa-fire fa-beat-fade fa-2xl" style="color: #914303;"></i>          </div>
+                    <div class="text-end">
+                      <h3><%=trendingProducts[0].productName%></h3>
+                      <div class="d-flex justify-content-between mt-3">
+                        <h5 class="mb-0">Trending Product</h5>
+                      <span class="mb-0">Total Orders: <%=trendingProducts[0].totalQuantity%></span>
+                      </div>
+                      
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+    <div class="col-xl-3 col-sm-6 col-12 mb-4">
+      <div class="card">
+        <div class="card-body">
+          <div class="d-flex justify-content-between px-md-1">
+            <div class="align-self-center">
+                <i class="fa-solid fa-cart-shopping fa-bounce fa-2xl" style="color: #946c00;"></i>           </div>
+            <div class="text-end">
+              <h3><%=mostOrderedCategory._id%></h3>
+              <p class="mb-0">Trending Category</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+</div>
+
+
+
+
         <div class="row">
             <div class="col-xl-8 col-lg-12" style="float: left;">
                 <div class="card mb-4">

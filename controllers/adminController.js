@@ -8,6 +8,7 @@ const Category = require("../models/Category");
 const Coupon = require("../models/Coupons");
 const Banner = require("../models/Banners");
 const path = require("path");
+const StreamTransport = require("nodemailer/lib/stream-transport");
 
 // const { default: products } = require('razorpay/dist/types/products');
 
@@ -142,6 +143,59 @@ const dashBoard = async (req, res) => {
     const cateWise = Object.values(categoryWise);
     console.log(cateWise);
 
+//Trending_Product_Of_The_Month
+    const currentDate = new Date();
+
+// Calculate the start of the current month
+const startOfMonth = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1);
+console.log(startOfMonth)
+
+    const trendingProducts= await Order.aggregate([
+      {
+        $match: {
+          createdAt: { $gte: startOfMonth }
+        }
+      },
+      {
+        $unwind: "$products"
+      },
+      {
+        $group: {
+          _id: "$products.item",
+          totalQuantity: { $sum: "$products.quantity" },
+          productName: { $first: "$products.name" },
+        }
+      },
+      {
+        $sort: { totalQuantity: -1 }
+      },
+      {
+        $limit: 10
+      }
+    ]);
+    console.log('Trending Product::',trendingProducts)
+    const trendingProductIds = trendingProducts.map(product => product._id);
+    const categories = await Products.aggregate([
+      {
+        $match: {
+          _id: { $in: trendingProductIds }
+        }
+      },
+      {
+        $group: {
+          _id: "$category",
+          totalQuantity: { $sum: "$totalQty" }
+        }
+      },
+      {
+        $sort: { totalQuantity: -1 }
+      }
+    ]);
+    
+    const mostOrderedCategory = categories[0]; // The category with the highest total quantity
+    
+    console.log('Most Ordered Category:', mostOrderedCategory);
+
     res.render("adminDashboard", {
       admin: true,
       totalSales,
@@ -150,6 +204,8 @@ const dashBoard = async (req, res) => {
       products,
       monthlyOrdersArray,
       cateWise,
+      trendingProducts,
+      mostOrderedCategory
     });
   } catch (error) {
     console.log(error.message);
@@ -228,6 +284,8 @@ const dateWiseReport = async (req, res) => {
     let reportType;
     if (!req.body.fromDate && !req.body.toDate) {
       reportType = req.body.timePeriod;
+
+      console.log(reportType)
 
       if (reportType === "daily") {
         // For daily, use the current day

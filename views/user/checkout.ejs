@@ -378,6 +378,7 @@
 
       // Serialize the form data
       var formData = $(this).serialize();
+      console.log(formData)
 
       Swal.fire({
         title: "Are you sure?",
@@ -434,7 +435,7 @@
         $.ajax({
           url: "/place-order",
           type: "post",
-          data:  formData,
+          data: formData,
           success: function (response) {
             // Handle the success response from the server
             switch (response.paymentOption) {
@@ -452,7 +453,7 @@
                 });
                 break;
               case "Razorpay":
-                razorpayPayment(response.order,response.couponCode);
+                razorpayPayment(response.order, response.couponCode);
 
                 break;
 
@@ -466,6 +467,29 @@
                   if (result.isConfirmed) {
                     // Load a new page or redirect to a different URL after the user clicks "OK"
                     window.location.href = "/landing-page"; // Replace with your desired URL
+                  }
+                });
+                break;
+
+              case "Free":
+                Swal.fire({
+                  title: "Order Confirmed",
+                  text: "Congratulations! Your order is eligible for a special discount, and the total amount has been reduced to zero.",
+                  icon: "success", // "success" or "info" or "warning" based on the style you prefer
+                  confirmButtonText: "Proceed",
+                }).then((result) => {
+                  if (result.isConfirmed) {
+                    Swal.fire({
+                  title: "Thank You!",
+                  text: "Your order has been placed successfully.",
+                  icon: "success",
+                  confirmButtonText: "OK",
+                }).then((result) => {
+                  if (result.isConfirmed) {
+                    // Load a new page or redirect to a different URL after the user clicks "OK"
+                    window.location.href = "/landing-page"; // Replace with your desired URL
+                  }
+                });
                   }
                 });
                 break;
@@ -501,7 +525,7 @@
     });
   });
 
-  function razorpayPayment(order,couponCode) {
+  function razorpayPayment(order, couponCode) {
     var options = {
       key: "rzp_test_SfiHz94Pmnimk2", // Enter the Key ID generated from the Dashboard
       amount: order.amount, // Amount is in currency subunits. Default currency is INR. Hence, 50000 refers to 50000 paise
@@ -515,7 +539,7 @@
         // alert(response.razorpay_payment_id);
         // alert(response.razorpay_order_id);
         // alert(response.razorpay_signature);
-        verifyPayment(response, order,couponCode);
+        verifyPayment(response, order, couponCode);
       },
       prefill: {
         name: "Gaurav Kumar",
@@ -556,13 +580,13 @@
     rzp1.open();
   }
 
-  function verifyPayment(payment, order,couponCode) {
+  function verifyPayment(payment, order, couponCode) {
     $.ajax({
       url: "/verify-payment",
       data: {
         payment,
         order,
-        couponCode
+        couponCode,
       },
       method: "post",
       success: (response) => {
@@ -621,3 +645,22 @@
   }).showToast();
 </script>
 <% } %>
+
+<style>
+  .my-actions {
+    margin: 0 2em;
+  }
+  .order-1 {
+    order: 1;
+  }
+  .order-2 {
+    order: 2;
+  }
+  .order-3 {
+    order: 3;
+  }
+
+  .right-gap {
+    margin-right: auto;
+  }
+</style>

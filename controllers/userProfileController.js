@@ -130,7 +130,7 @@ getEditProfile:async (req,res)=>{
 postEditProfile: async (req,res)=>{
     try {
         // console.log(req.body)
-        const {userId}=req.query;
+        const userId= req.session.user_id
         await Customer.updateOne(
             { _id: userId },
             {$set:{

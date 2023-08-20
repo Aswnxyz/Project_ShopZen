@@ -94,14 +94,25 @@ const insertUser = async (req, res) => {
         });
       } else {
         const hashedPassword = await bcrypt.hash(req.body.password, 10);
-        const newUser = new Customer({
-          name: req.body.firstName + " " + req.body.lastName,
-          email: req.body.email,
-          phone: req.body.mobile,
-          password: hashedPassword,
-          verified: false,
-        });
-        const savedUser = await newUser.save();
+        //Checking_If_Any_Unvefified_User_Exists
+        const unverifiedUser = await Customer.findOne({email:req.body.email,verified:false});
+        let savedUser;
+        if(unverifiedUser){
+          unverifiedUser.name=req.body.firstName + " " + req.body.lastName;
+          unverifiedUser.phone=req.body.mobile;
+          unverifiedUser.password=hashedPassword;
+          savedUser = await unverifiedUser.save()
+        }else{
+          const newUser = new Customer({
+            name: req.body.firstName + " " + req.body.lastName,
+            email: req.body.email,
+            phone: req.body.mobile,
+            password: hashedPassword,
+            verified: false,
+          });
+           savedUser = await newUser.save();
+        }
+
         console.log(savedUser);
         sendVerifyMail(req.body.firstName, req.body.email, savedUser._id);
         res.render("otpVerification", { savedUser });
@@ -320,9 +331,14 @@ const userLogout = async (req, res) => {
 //Search_Products
 const productSearch = async (req, res) => {
   try {
+    const page = parseInt(req.query.page) || 1;
+    console.log('PAGE',page)
+    const perPage = 100;
+    const skip = (page - 1) * perPage;
+
     const search = req.query.search;
 
-    const data = await Products.aggregate([
+    const aggregationPipeline=[
       {
         $match: {
           isActive: true,
@@ -342,7 +358,43 @@ const productSearch = async (req, res) => {
       {
         $replaceRoot: { newRoot: "$firstProduct" },
       },
-    ]);
+    ];
+
+    const count = await Products.aggregate(aggregationPipeline)
+
+    const totalProducts = count.length;
+    console.log(totalProducts)
+    const totalPages = Math.ceil(totalProducts / perPage);
+
+    aggregationPipeline.push({ $skip: skip });
+    aggregationPipeline.push({ $limit: perPage });
+
+
+    const data = await Products.aggregate(aggregationPipeline);
+
+
+
+    // const data = await Products.aggregate([
+    //   {
+    //     $match: {
+    //       isActive: true,
+    //       $or: [
+    //         { name: { $regex: ".*" + search + ".*", $options: "i" } },
+    //         { category: { $regex: ".*" + search + ".*", $options: "i" } },
+    //         { subCategory: { $regex: ".*" + search + ".*", $options: "i" } },
+    //       ],
+    //     },
+    //   },
+    //   {
+    //     $group: {
+    //       _id: "$name",
+    //       firstProduct: { $first: "$$ROOT" },
+    //     },
+    //   },
+    //   {
+    //     $replaceRoot: { newRoot: "$firstProduct" },
+    //   },
+    // ]);
 
     if (!data.length) {
       res.render("no-products-found");
@@ -356,8 +408,9 @@ const productSearch = async (req, res) => {
         name: { $in: uniqueCategoryNames },
       });
 
-      res.render("products", { data, categoryList });
+      res.render("products", { data, categoryList , totalPages, currentPage:page});
     }
+    // res.render("product-search-page")
   } catch (error) {
     console.log(error.message);
   }
@@ -370,19 +423,25 @@ const getProducts = async (req, res) => {
     console.log(req.query);
     console.log("BODY :::", req.body);
     const priceLimit = req.body.price;
-    
+
+
     const { category } = req.query;
-    const query = { category: category };
+    const query = {};
+    if(category){
+      query.category=category
+    }
+    
     query.isActive = true;
 
     let color = []
     if(req.body.color){
       if (Array.isArray(req.body.color)) {
-        color = req.body.subCategory;
+        color = req.body.color;
       } else {
         color = [req.body.color];
       }
     }
+    console.log('COLOR::::',req.body.color)
     if(color.length > 0 ){
       query.color= { $in:color }
     }
@@ -426,6 +485,7 @@ const getProducts = async (req, res) => {
       query.price = { $gte: minPrice, $lte: maxPrice };
     }
 
+    
     console.log("query::", query);
     // const data = await Products.find(query);
 
@@ -434,13 +494,11 @@ const getProducts = async (req, res) => {
     const perPage = 8;
     const skip = (page - 1) * perPage;
 
-    // const page = parseInt(req.query.page) || 1;
-    // const perPage = 8;
-
     // Build the aggregation pipeline
     const aggregationPipeline = [
       {
         $match: query,
+        
       },
       {
         $group: {
@@ -452,6 +510,9 @@ const getProducts = async (req, res) => {
         $replaceRoot: { newRoot: "$firstProduct" },
       },
     ];
+
+
+
     const count = await Products.aggregate(aggregationPipeline);
 
     const totalProducts = count.length;
@@ -467,6 +528,7 @@ const getProducts = async (req, res) => {
       aggregationPipeline.push({ $sort: { price: 1 } }); // Sort by price low to high
     }
 
+    console.log(aggregationPipeline)
     const data = await Products.aggregate(aggregationPipeline);
     
 
