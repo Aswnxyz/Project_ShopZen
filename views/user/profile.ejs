@@ -147,45 +147,7 @@
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
 
-<!-- Add this JavaScript code after including jQuery -->
 
-<!-- <script>
-    $(document).ready(function() {
-        // Function to handle the AJAX request for deleting an address
-        function deleteAddress(addressId) {
-            $.ajax({
-                type: "POST", // Use POST or DELETE method based on your server's API
-                url: "/delete-address", // Replace this with the actual API endpoint to delete the address
-                data: {
-                    addressId: addressId
-                },
-                success: function(response) {
-                    // If the address is successfully deleted, update the UI
-                    if (response.success) {
-                        // Remove the deleted address from the UI
-                        $("a[data-address-id='" + addressId + "']").closest("ul").remove();
-                    } else {
-                        // Handle the case where deletion was not successful
-                        alert("Failed to delete the address. Please try again.");
-                    }
-                },
-                error: function(xhr, status, error) {
-                    // Handle AJAX errors, if any
-                    console.error("AJAX Error:", error);
-                }
-            });
-        }
-
-        // Handle click events on the "Delete" buttons
-        $(".delete-address-btn").on("click", function(event) {
-            event.preventDefault();
-            var addressId = $(this).data("address-id");
-            if (confirm("Are you sure you want to delete this address?")) {
-                deleteAddress(addressId);
-            }
-        });
-    });
-</script> -->
 
 <!-- Place this script at the end of the body or inside the head section -->
 <script>

@@ -153,7 +153,8 @@ console.log(startOfMonth)
     const trendingProducts= await Order.aggregate([
       {
         $match: {
-          createdAt: { $gte: startOfMonth }
+          createdAt: { $gte: startOfMonth },
+          orderStatus:"recieved"
         }
       },
       {
@@ -184,13 +185,14 @@ console.log(startOfMonth)
       {
         $group: {
           _id: "$category",
-          totalQuantity: { $sum: "$totalQty" }
+          totalQuantity: { $sum: 1 }
         }
       },
       {
         $sort: { totalQuantity: -1 }
       }
     ]);
+    console.log(categories)
     
     const mostOrderedCategory = categories[0]; // The category with the highest total quantity
     
