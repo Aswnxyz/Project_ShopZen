@@ -249,7 +249,7 @@ module.exports = {
       console.log(cartItems);
 
       let cartTotal = cartSubTotal;
-      if (afterDiscount>=0) {
+      if (afterDiscount || afterDiscount === 0) {
         cartTotal = afterDiscount;
       }
 
