@@ -2,7 +2,7 @@ const { ObjectId } = require("mongodb");
 const Customer = require("../models/Customer");
 const Order = require("../models/Orders");
 const Products = require("../models/Products");
-const bcrypt = require("bcrypt");
+const bcrypt = require("bcryptjs");
 const { captureRejectionSymbol } = require("nodemailer/lib/xoauth2");
 const Category = require("../models/Category");
 const Coupon = require("../models/Coupons");
@@ -150,7 +150,7 @@ const dashBoard = async (req, res) => {
 const startOfMonth = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1);
 console.log(startOfMonth)
 
-    const trendingProducts= await Order.aggregate([
+    let trendingProducts= await Order.aggregate([
       {
         $match: {
           createdAt: { $gte: startOfMonth },
@@ -194,7 +194,9 @@ console.log(startOfMonth)
     ]);
     console.log(categories)
     
-    const mostOrderedCategory = categories[0]; // The category with the highest total quantity
+    let mostOrderedCategory = categories[0]; // The category with the highest total quantity
+
+   
     
     console.log('Most Ordered Category:', mostOrderedCategory);
 
@@ -243,6 +245,8 @@ const getReport = async (req, res) => {
         },
       },
     ]);
+
+
     console.log(monthlySales);
     const users = await Customer.countDocuments();
     console.log(users);

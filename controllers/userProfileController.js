@@ -2,7 +2,7 @@ const Address =require('../models/Address')
 const Customer =require('../models/Customer');
 const Wallet =require('../models/Wallet');
 const Cart =require('../models/Cart');
-const bcrypt= require('bcrypt');
+const bcrypt= require('bcryptjs');
 const { cartCountMiddelware } = require('../middleware/cartCount');
 const { ObjectId } = require('mongodb');
 

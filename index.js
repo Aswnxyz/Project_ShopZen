@@ -2,9 +2,9 @@ const express=require('express');
 const app=express();
 const expressLayouts = require('express-ejs-layouts');
 
-const mongoose= require("mongoose");
-mongoose.connect("mongodb://127.0.0.1:27017/ShopZen");
 require('dotenv').config()
+const mongoose= require("mongoose");
+mongoose.connect(process.env.MONGODB_CONNECT);
 
 
 const port = process.env.PORT || 3000;
